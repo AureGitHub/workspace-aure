@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      App1 - Ejemplo Tabla Usuarios
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,12 +9,67 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">Gestión de Usuarios</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="table-container">
+    <!-- Botón para agregar usuario de ejemplo -->
+    <div class="demo-actions">
+      <ion-button (click)="addSampleUser()" color="success" fill="outline">
+        <ion-icon name="person-add" slot="start"></ion-icon>
+        Agregar Usuario Demo
+      </ion-button>
+    </div>
+
+    <!-- Tabla de usuarios usando la librería compartida -->
+    <shared-table
+      [data]="usuarios"
+      [columns]="columns"
+      [config]="tableConfig"
+      title="Usuarios del Sistema"
+      emptyMessage="No hay usuarios registrados en el sistema"
+      [showToolbar]="true"
+      [showCaption]="true"
+      [showActions]="true"
+      [showAddButton]="true"
+      [showEditButton]="true"
+      [showDeleteButton]="true"
+      [showExportButton]="true"
+      (add)="onAddUser()"
+      (edit)="onEditUser($event)"
+      (delete)="onDeleteUser($event)"
+      (export)="onExportUsers()"
+      (selectionChange)="onSelectionChange($event)">
+    </shared-table>
+
+    <!-- Información adicional -->
+    <div class="info-panel">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Información de la Tabla</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><strong>Total usuarios:</strong> {{ usuarios.length }}</p>
+          <p><strong>Usuarios activos:</strong> {{ getUsuariosActivos().length }}</p>
+          <p><strong>Departamentos:</strong> {{ getDepartamentos().length }}</p>
+          <p class="demo-note">
+            <ion-icon name="information-circle" color="primary"></ion-icon>
+            Esta tabla usa el componente <code>SharedTableComponent</code> de la librería compartida.
+            Incluye funcionalidades como paginación, filtrado, ordenamiento, selección múltiple y acciones personalizadas.
+          </p>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
+
+  <!-- Toast para notificaciones -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [duration]="3000"
+    [color]="toastColor"
+    position="bottom"
+    (didDismiss)="showToast = false">
+  </ion-toast>
 </ion-content>
