@@ -1,0 +1,42 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Aplicación 1</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <h1>Aplicación 1</h1>
+    <p>Esta es la primera aplicación de ejemplo.</p>
+    
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Funcionalidades</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
+            <ion-label>Utiliza componentes de la librería compartida</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
+            <ion-label>Integración con PrimeNG</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
+            <ion-label>Arquitectura standalone de Angular</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button expand="block" color="primary" (click)="openExternalApp()">
+      <ion-icon name="open-outline" slot="start"></ion-icon>
+      Abrir Aplicación Externa
+    </ion-button>
+  </div>
+</ion-content>

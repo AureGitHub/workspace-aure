@@ -1,0 +1,54 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Portal de Aplicaciones
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Portal</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="container">
+    <div class="welcome-section">
+      <h1>Bienvenido al Portal</h1>
+      <p>Selecciona una aplicación para continuar:</p>
+    </div>
+
+    <div class="apps-grid">
+      <ion-card button (click)="navigateToApp1()" class="app-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="apps-outline" size="large"></ion-icon>
+            Aplicación 1
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          Primera aplicación de ejemplo que utiliza la librería compartida.
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card button (click)="navigateToApp2()" class="app-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="grid-outline" size="large"></ion-icon>
+            Aplicación 2
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          Segunda aplicación de ejemplo con componentes compartidos.
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <div class="shared-lib-demo">
+      <h2>Demo de Librería Compartida</h2>
+      <p>Aquí puedes ver un ejemplo del componente SharedTable:</p>
+      <!-- Aquí se podría agregar el componente SharedTable como demo -->
+    </div>
+  </div>
+</ion-content>

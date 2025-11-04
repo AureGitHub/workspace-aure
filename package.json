@@ -1,0 +1,28 @@
+{
+  "name": "workspace-aure",
+  "version": "1.0.0",
+  "description": "Workspace multiaplicación con Ionic 8 + Angular 19 + PrimeNG 20.3.0",
+  "scripts": {
+    "start:portal": "cd frontend/portal && ionic serve",
+    "start:app1": "cd frontend/app1 && ionic serve --port=8101",
+    "start:app2": "cd frontend/app2 && ionic serve --port=8102",
+    "build:all": "npm run build:shared && npm run build:portal && npm run build:app1 && npm run build:app2",
+    "build:shared": "cd frontend/shared-lib && npm run build",
+    "build:portal": "cd frontend/portal && ionic build",
+    "build:app1": "cd frontend/app1 && ionic build",
+    "build:app2": "cd frontend/app2 && ionic build",
+    "install:all": "cd frontend && npm install && cd portal && npm install && cd ../app1 && npm install && cd ../app2 && npm install && cd ../shared-lib && npm install"
+  },
+  "keywords": [
+    "ionic",
+    "angular",
+    "primeng",
+    "workspace",
+    "multiaplicacion"
+  ],
+  "author": "Workspace Aure Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
