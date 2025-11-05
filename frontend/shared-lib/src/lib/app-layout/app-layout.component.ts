@@ -24,80 +24,76 @@ export interface AppLayoutConfig {
     IonicModule
   ],
   template: `
-    <div class="app-layout-wrapper">
-      <!-- Header -->
-      <ion-header *ngIf="config.showHeader">
+    <!-- Header -->
+    <ion-header *ngIf="config.showHeader" [translucent]="false">
+      <ion-toolbar [color]="config.color || 'primary'">
+        <ion-buttons slot="start">
+          <ion-menu-button 
+            *ngIf="config.showMenuButton"
+            (click)="onMenuClick()">
+          </ion-menu-button>
+          <ion-button 
+            *ngIf="config.showBackButton"
+            fill="clear"
+            (click)="onBackClick()">
+            <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        
+        <ion-title>
+          {{ config.headerTitle || 'Workspace Aure' }}
+          <p *ngIf="config.headerSubtitle" class="header-subtitle">
+            {{ config.headerSubtitle }}
+          </p>
+        </ion-title>
+        
+        <ion-buttons slot="end">
+          <ion-button 
+            *ngIf="config.showUserProfile"
+            fill="clear"
+            (click)="onUserProfileClick()">
+            <ion-icon name="person-circle" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ng-content select="[slot=header-actions]"></ng-content>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <!-- Main Content -->
+    <ion-content [fullscreen]="false" [class.has-footer]="config.showFooter">
+      <ion-header collapse="condense" *ngIf="config.showHeader">
         <ion-toolbar [color]="config.color || 'primary'">
-          <ion-buttons slot="start">
-            <ion-menu-button 
-              *ngIf="config.showMenuButton"
-              (click)="onMenuClick()">
-            </ion-menu-button>
-            <ion-button 
-              *ngIf="config.showBackButton"
-              fill="clear"
-              (click)="onBackClick()">
-              <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          
-          <ion-title>
-            {{ config.headerTitle || 'Workspace Aure' }}
-            <p *ngIf="config.headerSubtitle" class="header-subtitle">
-              {{ config.headerSubtitle }}
-            </p>
-          </ion-title>
-          
-          <ion-buttons slot="end">
-            <ion-button 
-              *ngIf="config.showUserProfile"
-              fill="clear"
-              (click)="onUserProfileClick()">
-              <ion-icon name="person-circle" slot="icon-only"></ion-icon>
-            </ion-button>
-            <ng-content select="[slot=header-actions]"></ng-content>
-          </ion-buttons>
+          <ion-title size="large">{{ config.headerTitle }}</ion-title>
         </ion-toolbar>
       </ion-header>
+      
+      <div class="main-content">
+        <ng-content></ng-content>
+      </div>
+    </ion-content>
 
-      <!-- Main Content -->
-      <ion-content [fullscreen]="true">
-        <div class="main-content">
-          <ng-content></ng-content>
+    <!-- Footer fijo en la parte inferior -->
+    <div class="custom-footer" *ngIf="config.showFooter">
+      <div class="footer-content">
+        <div class="footer-left">
+          <span class="footer-text">
+            {{ config.footerText || 'Workspace Aure © 2025' }}
+          </span>
         </div>
-      </ion-content>
-
-      <!-- Footer -->
-      <ion-footer *ngIf="config.showFooter">
-        <ion-toolbar color="dark">
-          <div class="footer-content">
-            <div class="footer-left">
-              <span class="footer-text">
-                {{ config.footerText || 'Workspace Aure © 2025' }}
-              </span>
-            </div>
-            <div class="footer-center">
-              <ng-content select="[slot=footer-center]"></ng-content>
-            </div>
-            <div class="footer-right">
-              <ng-content select="[slot=footer-actions]"></ng-content>
-            </div>
-          </div>
-        </ion-toolbar>
-      </ion-footer>
+        <div class="footer-center">
+          <ng-content select="[slot=footer-center]"></ng-content>
+        </div>
+        <div class="footer-right">
+          <ng-content select="[slot=footer-actions]"></ng-content>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
     :host {
       display: block;
       height: 100vh;
-    }
-
-    .app-layout-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      width: 100%;
+      position: relative;
     }
 
     .header-subtitle {
@@ -108,22 +104,41 @@ export interface AppLayoutConfig {
     }
 
     ion-content {
-      flex: 1;
-      --padding-top: 0;
+      --padding-start: 0;
+      --padding-end: 0;
+      --padding-top: 20px;
       --padding-bottom: 0;
+    }
+
+    ion-content.has-footer {
+      --padding-bottom: 70px;
     }
 
     .main-content {
       padding: 1rem;
+      padding-top: 2rem;
       max-width: 1200px;
       margin: 0 auto;
       width: 100%;
-      min-height: 100%;
+      min-height: calc(100vh - 200px);
     }
 
-    ion-footer {
-      flex-shrink: 0;
+    .custom-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: var(--ion-color-dark, #222428);
+      color: var(--ion-color-dark-contrast, #ffffff);
+      border-top: 1px solid var(--ion-color-medium-shade, #92949c);
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
     }
+
+
 
     .footer-content {
       display: flex;
@@ -131,6 +146,8 @@ export interface AppLayoutConfig {
       justify-content: space-between;
       padding: 0.5rem 1rem;
       width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .footer-left {
@@ -140,7 +157,7 @@ export interface AppLayoutConfig {
 
     .footer-text {
       font-size: 0.875rem;
-      color: var(--ion-color-light);
+      color: var(--ion-color-light, #f4f5f8);
     }
 
     .footer-center {
