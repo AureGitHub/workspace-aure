@@ -1,18 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
   IonButton, 
   IonToast, 
   IonCard, 
   IonCardHeader, 
   IonCardTitle, 
   IonCardContent, 
-  IonIcon 
+  IonIcon,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel
 } from '@ionic/angular/standalone';
-import { SharedTableComponent, TableColumn, TableConfig } from 'shared-lib';
+import { 
+  SharedTableComponent, 
+  TableColumn, 
+  TableConfig, 
+  PrimeTableComponent, 
+  PrimeTableColumn, 
+  PrimeTableConfig,
+  AppLayoutComponent,
+  AppLayoutConfig
+} from 'shared-lib';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { personAdd, informationCircle } from 'ionicons/icons';
@@ -35,10 +43,6 @@ interface Usuario {
   styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [
-    IonHeader, 
-    IonToolbar, 
-    IonTitle, 
-    IonContent, 
     IonButton,
     IonToast,
     IonCard,
@@ -46,17 +50,41 @@ interface Usuario {
     IonCardTitle,
     IonCardContent,
     IonIcon,
+    IonSegment,
+    IonSegmentButton,
+    IonLabel,
     CommonModule,
-    SharedTableComponent
+    SharedTableComponent,
+    PrimeTableComponent,
+    AppLayoutComponent
   ],
 })
 export class HomePage implements OnInit {
   usuarios: Usuario[] = [];
   columns: TableColumn[] = [];
   tableConfig: TableConfig = {};
+  
+  // PrimeNG Table properties
+  primeColumns: PrimeTableColumn[] = [];
+  primeTableConfig: PrimeTableConfig = {};
+  
+  // UI State
   showToast = false;
   toastMessage = '';
   toastColor = 'success';
+  tableType: string = 'simple'; // 'simple' or 'prime'
+
+  // Layout Configuration
+  layoutConfig: AppLayoutConfig = {
+    showHeader: true,
+    showFooter: true,
+    headerTitle: 'App1 - Gestión de Usuarios',
+    headerSubtitle: 'Ejemplo de tabla con componentes compartidos',
+    footerText: 'Workspace Aure © 2025 - App1',
+    showBackButton: false,
+    showMenuButton: true,
+    showUserProfile: true
+  };
 
   constructor() {
     // Registrar iconos de Ionicons
@@ -69,6 +97,7 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.initializeData();
     this.setupTableConfig();
+    this.setupPrimeTableConfig();
   }
 
   initializeData() {
@@ -304,5 +333,149 @@ export class HomePage implements OnInit {
 
   getUsuariosActivos(): Usuario[] {
     return this.usuarios.filter(u => u.activo);
+  }
+
+  setupPrimeTableConfig() {
+    // Configure PrimeNG table columns
+    this.primeColumns = [
+      {
+        field: 'id',
+        header: 'ID',
+        type: 'number',
+        width: '80px',
+        sortable: true
+      },
+      {
+        field: 'nombre',
+        header: 'Nombre Completo',
+        type: 'text',
+        sortable: true,
+        filterable: true
+      },
+      {
+        field: 'email',
+        header: 'Email',
+        type: 'text',
+        sortable: true,
+        filterable: true
+      },
+      {
+        field: 'telefono',
+        header: 'Teléfono',
+        type: 'text'
+      },
+      {
+        field: 'departamento',
+        header: 'Departamento',
+        type: 'text',
+        sortable: true,
+        filterable: true
+      },
+      {
+        field: 'rol',
+        header: 'Rol',
+        type: 'text',
+        sortable: true,
+        filterable: true
+      },
+      {
+        field: 'estado',
+        header: 'Estado',
+        type: 'tag',
+        sortable: true,
+        filterable: true,
+        width: '120px'
+      },
+      {
+        field: 'activo',
+        header: 'Activo',
+        type: 'boolean',
+        sortable: true,
+        width: '100px'
+      },
+      {
+        field: 'fechaRegistro',
+        header: 'Fecha Registro',
+        type: 'date',
+        sortable: true,
+        width: '160px'
+      }
+    ];
+
+    // Configure PrimeNG table settings
+    this.primeTableConfig = {
+      paginator: true,
+      rows: 7,
+      showCurrentPageReport: true,
+      rowsPerPageOptions: [5, 7, 10, 25],
+      globalFilterFields: ['nombre', 'email', 'departamento', 'rol', 'estado'],
+      selectionMode: 'multiple',
+      dataKey: 'id',
+      sortMode: 'single',
+      scrollable: false,
+      responsive: true
+    };
+  }
+
+  // Table type toggle
+  onTableTypeChange(event: any) {
+    this.tableType = event.detail.value;
+    this.showToastMessage(`Cambiado a tabla ${this.tableType === 'prime' ? 'PrimeNG' : 'Simple'}`, 'primary');
+  }
+
+  // PrimeNG Table Event Handlers
+  onPrimeAdd() {
+    this.showToastMessage('PrimeNG: Función "Agregar Usuario" activada', 'success');
+  }
+
+  onPrimeEdit(usuario: Usuario) {
+    this.showToastMessage(`PrimeNG: Editando usuario: ${usuario.nombre}`, 'warning');
+    console.log('PrimeNG Editar usuario:', usuario);
+  }
+
+  onPrimeDelete(usuario: Usuario) {
+    this.showToastMessage(`PrimeNG: Usuario eliminado: ${usuario.nombre}`, 'danger');
+    console.log('PrimeNG Eliminar usuario:', usuario);
+    
+    // Simular eliminación
+    this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
+  }
+
+  onPrimeView(usuario: Usuario) {
+    this.showToastMessage(`PrimeNG: Viendo detalles de: ${usuario.nombre}`, 'tertiary');
+    console.log('PrimeNG Ver usuario:', usuario);
+  }
+
+  onPrimeExport() {
+    this.showToastMessage('PrimeNG: Exportando usuarios...', 'success');
+    console.log('PrimeNG Exportar usuarios:', this.usuarios);
+  }
+
+  onPrimeSelectionChange(selectedUsers: Usuario[]) {
+    console.log('PrimeNG Usuarios seleccionados:', selectedUsers);
+    if (selectedUsers.length > 0) {
+      this.showToastMessage(`PrimeNG: ${selectedUsers.length} usuario(s) seleccionado(s)`, 'info');
+    }
+  }
+
+  onRefreshData() {
+    this.showToastMessage('Datos actualizados', 'success');
+    console.log('Datos actualizados');
+  }
+
+  // Layout Event Handlers
+  onMenuClick() {
+    this.showToastMessage('Menú clickeado', 'primary');
+    console.log('Menú clickeado');
+  }
+
+  onBackClick() {
+    this.showToastMessage('Botón atrás clickeado', 'primary');
+    console.log('Botón atrás clickeado');
+  }
+
+  onUserProfileClick() {
+    this.showToastMessage('Perfil de usuario clickeado', 'primary');
+    console.log('Perfil de usuario clickeado');
   }
 }
