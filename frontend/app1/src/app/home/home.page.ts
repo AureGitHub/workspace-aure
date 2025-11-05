@@ -22,8 +22,9 @@ import {
   AppLayoutConfig
 } from 'shared-lib';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { personAdd, informationCircle } from 'ionicons/icons';
+import { personAdd, informationCircle, logIn } from 'ionicons/icons';
 
 interface Usuario {
   id: number;
@@ -54,6 +55,7 @@ interface Usuario {
     IonSegmentButton,
     IonLabel,
     CommonModule,
+    RouterLink,
     SharedTableComponent,
     PrimeTableComponent,
     AppLayoutComponent
@@ -90,7 +92,8 @@ export class HomePage implements OnInit {
     // Registrar iconos de Ionicons
     addIcons({
       'person-add': personAdd,
-      'information-circle': informationCircle
+      'information-circle': informationCircle,
+      'log-in': logIn
     });
   }
 

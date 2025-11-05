@@ -1,8 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { arrowBack, personCircle, menu } from 'ionicons/icons';
+import { arrowBack, personCircle, person, logIn, logOut, menu, close } from 'ionicons/icons';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
+import { AuthComponent } from '../auth/auth.component';
+import { LoginData, RegisterData, AuthResponse } from '../auth/auth.interfaces';
 
 export interface AppLayoutConfig {
   showHeader?: boolean;
@@ -21,7 +25,8 @@ export interface AppLayoutConfig {
   standalone: true,
   imports: [
     CommonModule,
-    IonicModule
+    IonicModule,
+    AuthComponent
   ],
   template: `
     <!-- Header -->
@@ -51,8 +56,13 @@ export interface AppLayoutConfig {
           <ion-button 
             *ngIf="config.showUserProfile"
             fill="clear"
-            (click)="onUserProfileClick()">
-            <ion-icon name="person-circle" slot="icon-only"></ion-icon>
+            (click)="onUserProfileClick()"
+            [color]="isAuthenticated ? 'primary' : 'medium'">
+            <ion-icon 
+              [name]="getUserIcon()" 
+              slot="icon-only"
+              [style.opacity]="isAuthenticated ? '1' : '0.5'">
+            </ion-icon>
           </ion-button>
           <ng-content select="[slot=header-actions]"></ng-content>
         </ion-buttons>
@@ -88,6 +98,56 @@ export interface AppLayoutConfig {
         </div>
       </div>
     </div>
+
+    <!-- Modal de Autenticación -->
+    <ion-modal 
+      [isOpen]="showAuthModal" 
+      (didDismiss)="closeAuthModal()">
+      <ng-template>
+        <!-- Modal para usuario autenticado (Perfil) -->
+        <div *ngIf="isAuthenticated" class="user-profile-modal">
+          <ion-header>
+            <ion-toolbar color="primary">
+              <ion-title>Mi Perfil</ion-title>
+              <ion-buttons slot="end">
+                <ion-button fill="clear" (click)="closeAuthModal()">
+                  <ion-icon name="close"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          
+          <ion-content class="profile-content">
+            <div class="user-profile">
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>¡Bienvenido!</ion-card-title>
+                  <ion-card-subtitle>Sesión activa</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <p>Has iniciado sesión correctamente.</p>
+                  <ion-button expand="block" color="danger" (click)="onLogout()">
+                    <ion-icon name="log-out" slot="start"></ion-icon>
+                    Cerrar Sesión
+                  </ion-button>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </ion-content>
+        </div>
+        
+        <!-- Componente de Autenticación como Modal completo -->
+        <lib-auth 
+          *ngIf="!isAuthenticated"
+          [config]="authConfig"
+          (login)="onAuthLogin($event)"
+          (register)="onAuthRegister($event)"
+          (forgotPassword)="onAuthForgotPassword($event)"
+          (socialLogin)="onAuthSocialLogin($event)"
+          (close)="closeAuthModal()">
+        </lib-auth>
+      </ng-template>
+    </ion-modal>
   `,
   styles: [`
     :host {
@@ -200,9 +260,45 @@ export interface AppLayoutConfig {
         padding: 0.5rem;
       }
     }
+
+    /* Estilos del modal de perfil de usuario */
+    .user-profile-modal {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-content {
+      flex: 1;
+      --padding-start: 0;
+      --padding-end: 0;
+      --padding-top: 0;
+      --padding-bottom: 0;
+    }
+
+    .user-profile {
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+    }
+
+    .user-profile ion-card {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    /* Responsive modal */
+    @media (max-width: 768px) {
+      .user-profile-modal {
+        height: 100vh;
+      }
+    }
   `]
 })
-export class AppLayoutComponent {
+export class AppLayoutComponent implements OnInit, OnDestroy {
   @Input() config: AppLayoutConfig = {
     showHeader: true,
     showFooter: true,
@@ -217,10 +313,52 @@ export class AppLayoutComponent {
   @Output() menuClick = new EventEmitter<void>();
   @Output() backClick = new EventEmitter<void>();
   @Output() userProfileClick = new EventEmitter<void>();
+  @Output() authLogin = new EventEmitter<LoginData>();
+  @Output() authRegister = new EventEmitter<RegisterData>();
 
-  constructor() {
+  // Estado de autenticación
+  isAuthenticated = false;
+  showAuthModal = false;
+  private authSubscription?: Subscription;
+
+  // Configuración del componente de autenticación
+  authConfig = {
+    showLogo: false,
+    title: 'Acceder a tu cuenta',
+    subtitle: 'Inicia sesión o crea una cuenta nueva',
+    allowRegistration: true,
+    allowForgotPassword: true,
+    allowRememberMe: true,
+    allowSocialLogin: false,
+    minPasswordLength: 6,
+    requireStrongPassword: false
+  };
+
+  constructor(private authService: AuthService) {
     // Registrar los iconos que vamos a usar
-    addIcons({ arrowBack, personCircle, menu });
+    addIcons({ 
+      arrowBack, 
+      personCircle, 
+      person,
+      'log-in': logIn,
+      'log-out': logOut,
+      menu,
+      close
+    });
+  }
+
+  ngOnInit() {
+    // Suscribirse al estado de autenticación
+    this.authSubscription = this.authService.isLogin$.subscribe(isLoggedIn => {
+      this.isAuthenticated = isLoggedIn;
+    });
+  }
+
+  ngOnDestroy() {
+    // Limpiar suscripciones
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 
   onMenuClick() {
@@ -232,6 +370,66 @@ export class AppLayoutComponent {
   }
 
   onUserProfileClick() {
+    // Abrir el modal de autenticación
+    this.showAuthModal = true;
     this.userProfileClick.emit();
+  }
+
+  // Métodos para el icono de usuario
+  getUserIcon(): string {
+    if (this.isAuthenticated) {
+      return 'person-circle';
+    } else {
+      return 'log-in';
+    }
+  }
+
+  // Métodos del modal
+  closeAuthModal() {
+    this.showAuthModal = false;
+  }
+
+  // Métodos de autenticación
+  onAuthLogin(loginData: LoginData) {
+    // Simular autenticación exitosa
+    this.authService.login();
+    this.authLogin.emit(loginData);
+    
+    // Cerrar modal después de un breve delay
+    setTimeout(() => {
+      this.closeAuthModal();
+    }, 1000);
+  }
+
+  onAuthRegister(registerData: RegisterData) {
+    // Simular registro exitoso
+    this.authService.login();
+    this.authRegister.emit(registerData);
+    
+    // Cerrar modal después de un breve delay
+    setTimeout(() => {
+      this.closeAuthModal();
+    }, 1000);
+  }
+
+  onAuthForgotPassword(data: { email: string }) {
+    console.log('Forgot password for:', data.email);
+    // Aquí puedes emitir un evento o manejar la lógica
+  }
+
+  onAuthSocialLogin(data: { provider: string }) {
+    console.log('Social login with:', data.provider);
+    // Simular login social exitoso
+    this.authService.login();
+    
+    // Cerrar modal después de un breve delay
+    setTimeout(() => {
+      this.closeAuthModal();
+    }, 1000);
+  }
+
+  onLogout() {
+    this.authService.logout();
+    this.closeAuthModal();
   }
 }

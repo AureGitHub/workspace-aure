@@ -1,0 +1,80 @@
+<div class="auth-demo-container">
+  <!-- Componente de Autenticación -->
+  <lib-auth 
+    [config]="authConfig"
+    (login)="onLogin($event)"
+    (register)="onRegister($event)"
+    (forgotPassword)="onForgotPassword($event)"
+    (socialLogin)="onSocialLogin($event)"
+    (authResponse)="handleAuthResponse($event)">
+  </lib-auth>
+
+  <!-- Panel de información del AuthService -->
+  <div class="auth-service-info">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>🔐 AuthService Status</ion-card-title>
+        <ion-card-subtitle>Estado: {{ authStatus }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="auth-status">
+          <p><strong>isLogin:</strong> {{ isAuthenticated }}</p>
+          <p><strong>Estado:</strong> {{ isAuthenticated ? '✅ Autenticado' : '❌ No autenticado' }}</p>
+        </div>
+        
+        <div class="auth-controls">
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="onLogout()" 
+            color="danger"
+            [disabled]="!isAuthenticated">
+            Logout
+          </ion-button>
+          
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="onToggleAuth()" 
+            color="warning">
+            Toggle
+          </ion-button>
+          
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="onCheckAuthState()" 
+            color="tertiary">
+            Check State
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Panel de información de demo (solo para pruebas) -->
+  <div class="demo-info" *ngIf="lastAction">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>🛠️ Demo Info</ion-card-title>
+        <ion-card-subtitle>Última acción: {{ lastAction }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <pre>{{ lastData | json }}</pre>
+        <ion-button fill="clear" (click)="clearDemo()" color="primary">
+          Limpiar
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Toast para notificaciones -->
+  <ion-toast 
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [duration]="3000"
+    [color]="toastColor"
+    position="top"
+    (didDismiss)="showToast = false">
+  </ion-toast>
+</div>

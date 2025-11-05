@@ -1,0 +1,83 @@
+.auth-demo-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+.auth-service-info {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  max-width: 280px;
+  
+  ion-card {
+    margin: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--ion-color-primary, #3880ff);
+  }
+  
+  .auth-status {
+    margin-bottom: 1rem;
+    
+    p {
+      margin: 0.25rem 0;
+      font-size: 0.9rem;
+    }
+  }
+  
+  .auth-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    
+    ion-button {
+      --border-radius: 6px;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.demo-info {
+  position: fixed;
+  top: 20px;
+  right: 320px;
+  z-index: 1000;
+  max-width: 300px;
+  
+  ion-card {
+    margin: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  pre {
+    font-size: 0.8rem;
+    background: var(--ion-color-light, #f4f5f8);
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+}
+
+// Ocultar el panel de demo en pantallas pequeñas
+@media (max-width: 768px) {
+  .auth-service-info,
+  .demo-info {
+    position: relative;
+    top: auto;
+    right: auto;
+    max-width: none;
+    margin: 1rem;
+  }
+  
+  .demo-info {
+    margin-top: 0;
+  }
+}
+
+// Ajustar el componente de autenticación en móviles
+@media (max-width: 480px) {
+  .auth-demo-container {
+    padding: 0;
+  }
+}
