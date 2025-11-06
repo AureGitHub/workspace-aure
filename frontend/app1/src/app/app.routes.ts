@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./auth-demo/auth-demo.page').then((m) => m.AuthDemoPage),
   },
   {
+    path: 'api-demo',
+    loadComponent: () => import('./api-demo/api-demo.page').then((m) => m.ApiDemoPage),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
