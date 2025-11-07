@@ -1,0 +1,1 @@
+Write-Host "=== PROBANDO API BACKEND ===" -ForegroundColor Green; try { $response = Invoke-RestMethod -Uri "http://localhost:3001/health" -Method GET; $response | ConvertTo-Json -Depth 10 } catch { Write-Host "Error: $_" -ForegroundColor Red }

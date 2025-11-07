@@ -1,484 +1,391 @@
-import { Component, OnInit } from '@angular/core';
-import { 
-  IonButton, 
-  IonToast, 
-  IonCard, 
-  IonCardHeader, 
-  IonCardTitle, 
-  IonCardContent, 
-  IonIcon,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel
-} from '@ionic/angular/standalone';
-import { 
-  SharedTableComponent, 
-  TableColumn, 
-  TableConfig, 
-  PrimeTableComponent, 
-  PrimeTableColumn, 
-  PrimeTableConfig,
-  AppLayoutComponent,
-  AppLayoutConfig
-} from 'shared-lib';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { IonicModule, ModalController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { personAdd, informationCircle, logIn } from 'ionicons/icons';
+import { 
+  homeOutline, 
+  businessOutline, 
+  peopleOutline, 
+  analyticsOutline, 
+  logInOutline, 
+  settingsOutline,
+  checkmarkCircleOutline,
+  phonePortraitOutline,
+  headsetOutline,
+  personOutline
+} from 'ionicons/icons';
 
-interface Usuario {
-  id: number;
-  nombre: string;
-  email: string;
-  telefono: string;
-  departamento: string;
-  estado: string;
-  fechaRegistro: Date;
-  activo: boolean;
-  rol: string;
-}
+// Imports de la librería compartida
+import { AuthService } from 'shared-lib';
+
+// Componente modal local
+import { AuthModalComponent } from '../components/auth-modal.component';
 
 @Component({
   selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [
-    IonButton,
-    IonToast,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonIcon,
-    IonSegment,
-    IonSegmentButton,
-    IonLabel,
-    CommonModule,
-    RouterLink,
-    SharedTableComponent,
-    PrimeTableComponent,
-    AppLayoutComponent
-  ],
+  imports: [CommonModule, IonicModule],
+  template: `
+    <ion-header [translucent]="true">
+      <ion-toolbar color="primary">
+        <ion-title>App Alquiler</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="openAuthModal()">
+            <ion-icon 
+              name="person-outline" 
+              slot="icon-only"
+              [color]="isAuthenticated ? 'success' : 'medium'">
+            </ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content [fullscreen]="true" class="home-content">
+      <!-- Header Hero Section -->
+      <div class="hero-section">
+        <div class="hero-content">
+          <ion-icon name="home-outline" class="hero-icon"></ion-icon>
+          <h1>Bienvenido a App Alquiler</h1>
+          <p>La plataforma más completa para gestionar tus propiedades de alquiler</p>
+        </div>
+      </div>
+
+      <!-- Features Section -->
+      <div class="features-section">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="4">
+              <ion-card class="feature-card">
+                <ion-card-content>
+                  <ion-icon name="business-outline" color="primary" class="feature-icon"></ion-icon>
+                  <h3>Gestión de Propiedades</h3>
+                  <p>Administra todas tus propiedades desde un solo lugar</p>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            
+            <ion-col size="12" size-md="4">
+              <ion-card class="feature-card">
+                <ion-card-content>
+                  <ion-icon name="people-outline" color="secondary" class="feature-icon"></ion-icon>
+                  <h3>Control de Inquilinos</h3>
+                  <p>Gestiona contratos, pagos y comunicación con inquilinos</p>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            
+            <ion-col size="12" size-md="4">
+              <ion-card class="feature-card">
+                <ion-card-content>
+                  <ion-icon name="analytics-outline" color="tertiary" class="feature-icon"></ion-icon>
+                  <h3>Reportes y Analytics</h3>
+                  <p>Obtén insights detallados sobre tu negocio inmobiliario</p>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+
+      <!-- CTA Section -->
+      <div class="cta-section">
+        <ion-card class="cta-card">
+          <ion-card-content class="cta-content">
+            <h2>¿Listo para comenzar?</h2>
+            <p>Únete a miles de propietarios que ya confían en nuestra plataforma</p>
+            <div class="cta-buttons">
+              <ion-button 
+                expand="block" 
+                color="primary" 
+                size="large"
+                (click)="goToAuth()">
+                <ion-icon name="log-in-outline" slot="start"></ion-icon>
+                Iniciar Sesión
+              </ion-button>
+              <ion-button 
+                expand="block" 
+                fill="outline" 
+                color="primary" 
+                size="large"
+                (click)="goToUserManagement()">
+                <ion-icon name="settings-outline" slot="start"></ion-icon>
+                Ver Gestión de Usuarios
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Info Section -->
+      <div class="info-section">
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="checkmark-circle-outline" color="success" slot="start"></ion-icon>
+            <ion-label>
+              <h3>100% Seguro</h3>
+              <p>Tus datos están protegidos con la mejor seguridad</p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item>
+            <ion-icon name="phone-portrait-outline" color="primary" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Multiplataforma</h3>
+              <p>Accede desde cualquier dispositivo, en cualquier momento</p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item>
+            <ion-icon name="headset-outline" color="secondary" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Soporte 24/7</h3>
+              <p>Nuestro equipo está aquí para ayudarte cuando lo necesites</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+    </ion-content>
+
+    <!-- Toast para mensajes -->
+    <ion-toast 
+      [isOpen]="showToast"
+      [message]="toastMessage"
+      [duration]="3000"
+      [color]="toastColor"
+      position="bottom"
+      (didDismiss)="showToast = false">
+    </ion-toast>
+  `,
+  styles: [`
+    .home-content {
+      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .hero-section {
+      padding: 60px 20px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+    }
+
+    .hero-content h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .hero-content p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .hero-icon {
+      font-size: 4rem;
+      color: white;
+    }
+
+    .features-section {
+      padding: 40px 20px;
+      background: white;
+    }
+
+    .feature-card {
+      text-align: center;
+      margin: 10px 0;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      color: var(--ion-color-dark);
+      margin: 16px 0 8px;
+      font-weight: 600;
+    }
+
+    .feature-card p {
+      color: var(--ion-color-medium);
+      line-height: 1.5;
+    }
+
+    .cta-section {
+      padding: 40px 20px;
+      background: var(--ion-color-light);
+    }
+
+    .cta-card {
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .cta-content {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .cta-content h2 {
+      color: var(--ion-color-dark);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .cta-content p {
+      color: var(--ion-color-medium);
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .info-section {
+      padding: 40px 20px;
+      background: white;
+    }
+
+    .info-section ion-item {
+      --padding-start: 20px;
+      --inner-padding-end: 20px;
+      margin: 10px 0;
+      border-radius: 12px;
+      --background: var(--ion-color-light);
+    }
+
+    .info-section h3 {
+      color: var(--ion-color-dark);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .info-section p {
+      color: var(--ion-color-medium);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 2rem;
+      }
+      
+      .hero-content p {
+        font-size: 1rem;
+      }
+      
+      .cta-buttons {
+        max-width: 100%;
+      }
+    }
+  `]
 })
-export class HomePage implements OnInit {
-  usuarios: Usuario[] = [];
-  columns: TableColumn[] = [];
-  tableConfig: TableConfig = {};
-  
-  // PrimeNG Table properties
-  primeColumns: PrimeTableColumn[] = [];
-  primeTableConfig: PrimeTableConfig = {};
-  
-  // UI State
+export class HomePage implements OnInit, OnDestroy {
+  // Estado de autenticación
+  isAuthenticated = false;
+  private authSubscription?: Subscription;
+
+
+
+  // Toast para mensajes
   showToast = false;
   toastMessage = '';
   toastColor = 'success';
-  tableType: string = 'simple'; // 'simple' or 'prime'
 
-  // Layout Configuration
-  layoutConfig: AppLayoutConfig = {
-    showHeader: true,
-    showFooter: true,
-    headerTitle: 'App1 - Gestión de Usuarios',
-    headerSubtitle: 'Ejemplo de tabla con componentes compartidos',
-    footerText: 'Workspace Aure © 2025 - App1',
-    showBackButton: false,
-    showMenuButton: true,
-    showUserProfile: true
-  };
-
-  constructor() {
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private modalController: ModalController
+  ) {
     // Registrar iconos de Ionicons
     addIcons({
-      'person-add': personAdd,
-      'information-circle': informationCircle,
-      'log-in': logIn
+      'home-outline': homeOutline,
+      'business-outline': businessOutline,
+      'people-outline': peopleOutline,
+      'analytics-outline': analyticsOutline,
+      'log-in-outline': logInOutline,
+      'settings-outline': settingsOutline,
+      'checkmark-circle-outline': checkmarkCircleOutline,
+      'phone-portrait-outline': phonePortraitOutline,
+      'headset-outline': headsetOutline,
+      'person-outline': personOutline
     });
   }
 
   ngOnInit() {
-    this.initializeData();
-    this.setupTableConfig();
-    this.setupPrimeTableConfig();
+    console.log('Home page loaded');
+    this.checkAuthentication();
   }
 
-  initializeData() {
-    // Datos de ejemplo para la tabla
-    this.usuarios = [
-      {
-        id: 1,
-        nombre: 'Ana García',
-        email: 'ana.garcia@empresa.com',
-        telefono: '+34 666 111 222',
-        departamento: 'Desarrollo',
-        estado: 'Activo',
-        fechaRegistro: new Date('2024-01-15'),
-        activo: true,
-        rol: 'Desarrolladora Senior'
-      },
-      {
-        id: 2,
-        nombre: 'Carlos López',
-        email: 'carlos.lopez@empresa.com',
-        telefono: '+34 666 333 444',
-        departamento: 'Marketing',
-        estado: 'Pendiente',
-        fechaRegistro: new Date('2024-02-20'),
-        activo: true,
-        rol: 'Especialista Marketing'
-      },
-      {
-        id: 3,
-        nombre: 'María Rodríguez',
-        email: 'maria.rodriguez@empresa.com',
-        telefono: '+34 666 555 666',
-        departamento: 'Recursos Humanos',
-        estado: 'Activo',
-        fechaRegistro: new Date('2024-01-10'),
-        activo: true,
-        rol: 'Coordinadora RRHH'
-      },
-      {
-        id: 4,
-        nombre: 'David Martín',
-        email: 'david.martin@empresa.com',
-        telefono: '+34 666 777 888',
-        departamento: 'Desarrollo',
-        estado: 'Inactivo',
-        fechaRegistro: new Date('2024-03-05'),
-        activo: false,
-        rol: 'Desarrollador Junior'
-      },
-      {
-        id: 5,
-        nombre: 'Laura Sánchez',
-        email: 'laura.sanchez@empresa.com',
-        telefono: '+34 666 999 000',
-        departamento: 'Ventas',
-        estado: 'Activo',
-        fechaRegistro: new Date('2024-02-28'),
-        activo: true,
-        rol: 'Gerente de Ventas'
-      },
-      {
-        id: 6,
-        nombre: 'Roberto Fernández',
-        email: 'roberto.fernandez@empresa.com',
-        telefono: '+34 666 111 333',
-        departamento: 'Soporte',
-        estado: 'Pendiente',
-        fechaRegistro: new Date('2024-03-15'),
-        activo: true,
-        rol: 'Técnico de Soporte'
-      },
-      {
-        id: 7,
-        nombre: 'Carmen Jiménez',
-        email: 'carmen.jimenez@empresa.com',
-        telefono: '+34 666 444 555',
-        departamento: 'Contabilidad',
-        estado: 'Activo',
-        fechaRegistro: new Date('2024-01-25'),
-        activo: true,
-        rol: 'Contadora Senior'
-      },
-      {
-        id: 8,
-        nombre: 'Javier Moreno',
-        email: 'javier.moreno@empresa.com',
-        telefono: '+34 666 666 777',
-        departamento: 'Desarrollo',
-        estado: 'Error',
-        fechaRegistro: new Date('2024-03-01'),
-        activo: false,
-        rol: 'DevOps Engineer'
-      }
-    ];
-  }
-
-  setupTableConfig() {
-    // Configuración de columnas
-    this.columns = [
-      {
-        field: 'id',
-        header: 'ID',
-        type: 'number',
-        width: '80px',
-        sortable: true
-      },
-      {
-        field: 'nombre',
-        header: 'Nombre Completo',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'email',
-        header: 'Email',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'telefono',
-        header: 'Teléfono',
-        type: 'text'
-      },
-      {
-        field: 'departamento',
-        header: 'Departamento',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'rol',
-        header: 'Rol',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'estado',
-        header: 'Estado',
-        type: 'tag',
-        sortable: true,
-        filterable: true,
-        width: '120px'
-      },
-      {
-        field: 'activo',
-        header: 'Activo',
-        type: 'boolean',
-        sortable: true,
-        width: '100px'
-      },
-      {
-        field: 'fechaRegistro',
-        header: 'Fecha Registro',
-        type: 'date',
-        sortable: true,
-        width: '160px'
-      }
-    ];
-
-    // Configuración de la tabla
-    this.tableConfig = {
-      paginator: true,
-      rows: 5,
-      showCurrentPageReport: true,
-      rowsPerPageOptions: [5, 10, 25],
-      globalFilterFields: ['nombre', 'email', 'departamento', 'rol', 'estado'],
-      selectionMode: 'multiple'
-    };
-  }
-
-  // Eventos de la tabla
-  onAddUser() {
-    this.showToastMessage('Función "Agregar Usuario" activada', 'primary');
-  }
-
-  onEditUser(usuario: Usuario) {
-    this.showToastMessage(`Editando usuario: ${usuario.nombre}`, 'warning');
-    console.log('Editar usuario:', usuario);
-  }
-
-  onDeleteUser(usuario: Usuario) {
-    this.showToastMessage(`Usuario eliminado: ${usuario.nombre}`, 'danger');
-    console.log('Eliminar usuario:', usuario);
-    
-    // Simular eliminación
-    this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
-  }
-
-  onExportUsers() {
-    this.showToastMessage('Exportando usuarios...', 'success');
-    console.log('Exportar usuarios:', this.usuarios);
-  }
-
-  onSelectionChange(selectedUsers: Usuario[]) {
-    console.log('Usuarios seleccionados:', selectedUsers);
-    if (selectedUsers.length > 0) {
-      this.showToastMessage(`${selectedUsers.length} usuario(s) seleccionado(s)`, 'tertiary');
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
     }
   }
 
-  // Funciones auxiliares
-  showToastMessage(message: string, color: string = 'success') {
+  private checkAuthentication() {
+    // Suscribirse a cambios en el estado de autenticación
+    this.authSubscription = this.authService.isLogin$.subscribe(isLoggedIn => {
+      this.isAuthenticated = isLoggedIn;
+    });
+  }
+
+  // Método para abrir el modal de autenticación
+  async openAuthModal() {
+    if (this.isAuthenticated) {
+      // Si ya está autenticado, ir directamente a user management
+      this.goToUserManagement();
+    } else {
+      // Si no está autenticado, abrir modal de login
+      const modal = await this.modalController.create({
+        component: AuthModalComponent,
+        backdropDismiss: true,
+        showBackdrop: true
+      });
+
+      // Manejar respuesta del modal
+      modal.onDidDismiss().then((result) => {
+        if (result.data?.success) {
+          this.showToastMessage(result.data.message, 'success');
+          if (result.data.user) {
+            // Si el login fue exitoso, navegar a user management
+            this.goToUserManagement();
+          }
+        } else if (result.data?.message) {
+          this.showToastMessage(result.data.message, 'warning');
+        }
+      });
+
+      await modal.present();
+    }
+  }
+
+
+
+  goToAuth() {
+    this.openAuthModal();
+  }
+
+  goToUserManagement() {
+    this.router.navigate(['/user-management']);
+  }
+
+  private showToastMessage(message: string, color: string = 'success') {
     this.toastMessage = message;
     this.toastColor = color;
     this.showToast = true;
-  }
-
-  addSampleUser() {
-    const newUser: Usuario = {
-      id: this.usuarios.length + 1,
-      nombre: 'Nuevo Usuario',
-      email: 'nuevo@empresa.com',
-      telefono: '+34 666 000 111',
-      departamento: 'Desarrollo',
-      estado: 'Pendiente',
-      fechaRegistro: new Date(),
-      activo: true,
-      rol: 'Desarrollador'
-    };
-    
-    this.usuarios = [...this.usuarios, newUser];
-    this.showToastMessage('Usuario agregado correctamente', 'success');
-  }
-
-  getDepartamentos(): string[] {
-    const departamentos = [...new Set(this.usuarios.map(u => u.departamento))];
-    return departamentos;
-  }
-
-  getUsuariosActivos(): Usuario[] {
-    return this.usuarios.filter(u => u.activo);
-  }
-
-  setupPrimeTableConfig() {
-    // Configure PrimeNG table columns
-    this.primeColumns = [
-      {
-        field: 'id',
-        header: 'ID',
-        type: 'number',
-        width: '80px',
-        sortable: true
-      },
-      {
-        field: 'nombre',
-        header: 'Nombre Completo',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'email',
-        header: 'Email',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'telefono',
-        header: 'Teléfono',
-        type: 'text'
-      },
-      {
-        field: 'departamento',
-        header: 'Departamento',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'rol',
-        header: 'Rol',
-        type: 'text',
-        sortable: true,
-        filterable: true
-      },
-      {
-        field: 'estado',
-        header: 'Estado',
-        type: 'tag',
-        sortable: true,
-        filterable: true,
-        width: '120px'
-      },
-      {
-        field: 'activo',
-        header: 'Activo',
-        type: 'boolean',
-        sortable: true,
-        width: '100px'
-      },
-      {
-        field: 'fechaRegistro',
-        header: 'Fecha Registro',
-        type: 'date',
-        sortable: true,
-        width: '160px'
-      }
-    ];
-
-    // Configure PrimeNG table settings
-    this.primeTableConfig = {
-      paginator: true,
-      rows: 7,
-      showCurrentPageReport: true,
-      rowsPerPageOptions: [5, 7, 10, 25],
-      globalFilterFields: ['nombre', 'email', 'departamento', 'rol', 'estado'],
-      selectionMode: 'multiple',
-      dataKey: 'id',
-      sortMode: 'single',
-      scrollable: false,
-      responsive: true
-    };
-  }
-
-  // Table type toggle
-  onTableTypeChange(event: any) {
-    this.tableType = event.detail.value;
-    this.showToastMessage(`Cambiado a tabla ${this.tableType === 'prime' ? 'PrimeNG' : 'Simple'}`, 'primary');
-  }
-
-  // PrimeNG Table Event Handlers
-  onPrimeAdd() {
-    this.showToastMessage('PrimeNG: Función "Agregar Usuario" activada', 'success');
-  }
-
-  onPrimeEdit(usuario: Usuario) {
-    this.showToastMessage(`PrimeNG: Editando usuario: ${usuario.nombre}`, 'warning');
-    console.log('PrimeNG Editar usuario:', usuario);
-  }
-
-  onPrimeDelete(usuario: Usuario) {
-    this.showToastMessage(`PrimeNG: Usuario eliminado: ${usuario.nombre}`, 'danger');
-    console.log('PrimeNG Eliminar usuario:', usuario);
-    
-    // Simular eliminación
-    this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
-  }
-
-  onPrimeView(usuario: Usuario) {
-    this.showToastMessage(`PrimeNG: Viendo detalles de: ${usuario.nombre}`, 'tertiary');
-    console.log('PrimeNG Ver usuario:', usuario);
-  }
-
-  onPrimeExport() {
-    this.showToastMessage('PrimeNG: Exportando usuarios...', 'success');
-    console.log('PrimeNG Exportar usuarios:', this.usuarios);
-  }
-
-  onPrimeSelectionChange(selectedUsers: Usuario[]) {
-    console.log('PrimeNG Usuarios seleccionados:', selectedUsers);
-    if (selectedUsers.length > 0) {
-      this.showToastMessage(`PrimeNG: ${selectedUsers.length} usuario(s) seleccionado(s)`, 'info');
-    }
-  }
-
-  onRefreshData() {
-    this.showToastMessage('Datos actualizados', 'success');
-    console.log('Datos actualizados');
-  }
-
-  // Layout Event Handlers
-  onMenuClick() {
-    this.showToastMessage('Menú clickeado', 'primary');
-    console.log('Menú clickeado');
-  }
-
-  onBackClick() {
-    this.showToastMessage('Botón atrás clickeado', 'primary');
-    console.log('Botón atrás clickeado');
-  }
-
-  onUserProfileClick() {
-    this.showToastMessage('Perfil de usuario clickeado', 'primary');
-    console.log('Perfil de usuario clickeado');
   }
 }

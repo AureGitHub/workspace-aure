@@ -1,0 +1,51 @@
+{
+  "name": "@workspace-aure/app-alquiler-backend",
+  "version": "1.0.0",
+  "description": "Backend API para la aplicación de alquiler",
+  "main": "src/main.ts",
+  "type": "module",
+  "exports": {
+    ".": "./src/main.ts"
+  },
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-env --watch src/main.ts",
+    "start": "deno run --allow-net --allow-read --allow-env src/main.ts",
+    "test": "deno test --allow-net --allow-read --allow-env",
+    "check": "deno check src/**/*.ts",
+    "fmt": "deno fmt",
+    "lint": "deno lint"
+  },
+  "imports": {
+    "@common-lib/": "../common-lib/src/",
+    "@oak/oak": "jsr:@oak/oak@^17.1.0",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.0",
+    "@std/log": "jsr:@std/log@^0.224.9",
+    "@std/crypto": "jsr:@std/crypto@^1.0.3",
+    "@std/encoding": "jsr:@std/encoding@^1.0.5",
+    "postgres": "https://deno.land/x/postgres@v0.19.3/mod.ts",
+    "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": false,
+    "proseWrap": "preserve",
+    "include": ["src/"]
+  },
+  "lint": {
+    "include": ["src/"],
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "test": {
+    "include": ["src/", "tests/"]
+  }
+}

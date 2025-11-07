@@ -1,7 +1,7 @@
 {
   "name": "workspace-aure",
   "version": "1.0.0",
-  "description": "Workspace multiaplicación con Ionic 8 + Angular 20 + PrimeNG 20.3.0",
+  "description": "Workspace multiaplicación con Frontend (Ionic 8 + Angular 20 + PrimeNG 20.3.0) y Backend (Deno.js + Oak + PostgreSQL)",
   "private": true,
   "workspaces": [
     "frontend/*"
@@ -10,11 +10,17 @@
     "start:portal": "cd frontend/portal && ng serve --port=8100",
     "start:app-alquiler": "cd frontend/app-alquiler && ng serve --port=8101",
     "start:app2": "cd frontend/app2 && ng serve --port=8102",
+    "start:backend-alquiler": "cd backend/app-alquiler && deno task dev",
+    "start:backend-alquiler-prod": "cd backend/app-alquiler && deno task start",
     "build:all": "npm run build:shared && npm run build:portal && npm run build:app-alquiler && npm run build:app2",
     "build:shared": "cd frontend/shared-lib && ng build",
     "build:portal": "cd frontend/portal && ng build",
     "build:app-alquiler": "cd frontend/app-alquiler && ng build",
     "build:app2": "cd frontend/app2 && ng build",
+    "backend:check": "cd backend/app-alquiler && deno task check",
+    "backend:fmt": "cd backend/app-alquiler && deno task fmt",
+    "backend:lint": "cd backend/app-alquiler && deno task lint",
+    "backend:test": "cd backend/app-alquiler && deno task test",
     "install:all": "npm install",
     "clean:node_modules": "rm -rf node_modules frontend/*/node_modules",
     "fresh:install": "npm run clean:node_modules && npm install"
@@ -73,6 +79,10 @@
     "ionic",
     "angular",
     "primeng",
+    "deno",
+    "oak",
+    "postgresql",
+    "jwt",
     "workspace",
     "multiaplicacion",
     "monorepo"

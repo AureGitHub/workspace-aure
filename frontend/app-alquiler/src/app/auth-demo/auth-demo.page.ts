@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { 
   IonCard, 
@@ -7,16 +7,27 @@ import {
   IonCardSubtitle, 
   IonCardContent, 
   IonButton,
-  IonToast
+  IonToast,
+  IonSpinner,
+  IonText,
+  IonChip,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList
 } from '@ionic/angular/standalone';
 import { 
   AuthComponent, 
   AuthConfig, 
   LoginData, 
   RegisterData, 
-  AuthResponse,
-  AuthService 
+  AuthService as SharedAuthService
 } from 'shared-lib';
+import { ApiService, User, LoginRequest, RegisterRequest } from '../services/api.service';
+import { AuthService } from '../services/auth.service';
+import { Subscription } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { checkmarkCircle, alertCircle, person, wifi, server } from 'ionicons/icons';
 
 @Component({
   selector: 'app-auth-demo',
@@ -32,186 +43,232 @@ import {
     IonCardContent,
     IonButton,
     IonToast,
+    IonSpinner,
+    IonChip,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
     AuthComponent
   ]
 })
-export class AuthDemoPage {
+export class AuthDemoPage implements OnDestroy {
   
   // Configuración del componente de autenticación
   authConfig: AuthConfig = {
     showLogo: true,
-    logoUrl: 'assets/logo.png', // Puedes cambiar por tu logo
-    title: 'Workspace Aure',
-    subtitle: 'Accede a tu cuenta o crea una nueva',
+    logoUrl: 'assets/logo.png',
+    title: 'App Alquiler',
+    subtitle: 'Conectando con Backend Deno.js',
     color: 'primary',
     allowRegistration: true,
-    allowForgotPassword: true,
+    allowForgotPassword: false, // Deshabilitado por ahora
     allowRememberMe: true,
-    allowSocialLogin: true,
-    minPasswordLength: 8,
-    requireStrongPassword: true,
+    allowSocialLogin: false, // Deshabilitado por ahora
+    minPasswordLength: 6,
+    requireStrongPassword: false,
     loginButtonText: 'Iniciar Sesión',
     registerButtonText: 'Crear Cuenta',
     forgotPasswordText: '¿Olvidaste tu contraseña?',
     switchToRegisterText: '¿No tienes cuenta? Regístrate aquí',
-    switchToLoginText: '¿Ya tienes cuenta? Inicia sesión',
-    termsUrl: 'https://ejemplo.com/terminos',
-    privacyUrl: 'https://ejemplo.com/privacidad'
+    switchToLoginText: '¿Ya tienes cuenta? Inicia sesión'
   };
 
-  // Estado de demo
-  lastAction = '';
-  lastData: any = null;
+  // Estado de la aplicación
+  currentUser: User | null = null;
+  isAuthenticated = false;
+  isLoading = false;
+  
+  // Estado de la API
+  apiStatus = 'checking';
+  apiHealth: any = null;
+  
+  // Toast
   toastMessage = '';
   showToast = false;
-  toastColor = 'success';
+  toastColor: 'success' | 'danger' | 'warning' | 'primary' = 'success';
+  
+  // Demo data
+  lastAction = '';
+  lastData: any = null;
 
-  // Estado de autenticación del servicio
-  isAuthenticated = false;
-  authStatus = '';
+  // Demo users para pruebas rápidas
+  demoUsers = [
+    { label: 'Admin', email: 'admin@test.com', password: 'admin123', type: 'admin' },
+    { label: 'Owner', email: 'owner@test.com', password: 'owner123', type: 'owner' },
+    { label: 'Tenant', email: 'tenant@test.com', password: 'tenant123', type: 'tenant' },
+    { label: 'Aure', email: 'aure@workspace.com', password: 'aure123', type: 'admin' }
+  ];
 
-  constructor(private authService: AuthService) {
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private apiService: ApiService, 
+    private authService: AuthService,
+    private sharedAuthService: SharedAuthService
+  ) {
+    // Configurar iconos
+    addIcons({ checkmarkCircle, alertCircle, person, wifi, server });
+    
     // Suscribirse al estado de autenticación
-    this.authService.isLogin$.subscribe(isLoggedIn => {
-      this.isAuthenticated = isLoggedIn;
-      this.authStatus = this.authService.authStatus();
+    this.subscriptions.push(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+      }),
+      this.authService.isAuthenticated$.subscribe(isAuth => {
+        this.isAuthenticated = isAuth;
+      })
+    );
+    
+    // Verificar estado de la API
+    this.checkApiHealth();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  // ===================
+  // MÉTODOS DE LA API
+  // ===================
+
+  checkApiHealth() {
+    this.apiStatus = 'checking';
+    this.apiService.getHealth().subscribe({
+      next: (response) => {
+        this.apiHealth = response;
+        this.apiStatus = 'connected';
+        console.log('✅ API Health:', response);
+      },
+      error: (error) => {
+        this.apiStatus = 'error';
+        console.error('❌ API Health Error:', error);
+        this.showToastMessage('No se puede conectar al backend', 'danger');
+      }
     });
   }
 
   // Manejar login
   onLogin(loginData: LoginData) {
-    console.log('Login attempt:', loginData);
+    console.log('🔐 Login attempt:', loginData);
     this.lastAction = 'Login';
     this.lastData = loginData;
+    this.isLoading = true;
     
-    // Simular autenticación (reemplazar con tu lógica real)
-    setTimeout(() => {
-      const mockResponse: AuthResponse = {
-        success: true,
-        message: 'Login exitoso',
-        user: {
-          id: '123',
-          email: loginData.email,
-          firstName: 'Usuario',
-          lastName: 'Demo',
-          token: 'mock-jwt-token'
+    const credentials: LoginRequest = {
+      email: loginData.email,
+      password: loginData.password
+    };
+
+    this.authService.login(credentials).subscribe({
+      next: (success) => {
+        this.isLoading = false;
+        if (success) {
+          this.showToastMessage('¡Login exitoso!', 'success');
+        } else {
+          this.showToastMessage('Credenciales incorrectas', 'danger');
         }
-      };
-      
-      this.handleAuthResponse(mockResponse);
-    }, 2000);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.showToastMessage(error.friendlyMessage || 'Error en el login', 'danger');
+      }
+    });
   }
 
   // Manejar registro
   onRegister(registerData: RegisterData) {
-    console.log('Register attempt:', registerData);
+    console.log('📝 Register attempt:', registerData);
     this.lastAction = 'Register';
     this.lastData = registerData;
+    this.isLoading = true;
     
-    // Simular registro (reemplazar con tu lógica real)
-    setTimeout(() => {
-      const mockResponse: AuthResponse = {
-        success: true,
-        message: 'Registro exitoso',
-        user: {
-          id: '124',
-          email: registerData.email,
-          firstName: registerData.firstName,
-          lastName: registerData.lastName,
-          token: 'mock-jwt-token'
+    const userData: RegisterRequest = {
+      username: registerData.email.split('@')[0], // Usar email como base para username
+      email: registerData.email,
+      password: registerData.password,
+      first_name: registerData.firstName,
+      last_name: registerData.lastName,
+      user_type: 'tenant' // Por defecto crear como tenant
+    };
+
+    this.authService.register(userData).subscribe({
+      next: (success) => {
+        this.isLoading = false;
+        if (success) {
+          this.showToastMessage('¡Registro exitoso! Ya puedes iniciar sesión', 'success');
+        } else {
+          this.showToastMessage('Error en el registro', 'danger');
         }
-      };
-      
-      this.handleAuthResponse(mockResponse);
-    }, 2000);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.showToastMessage(error.friendlyMessage || 'Error en el registro', 'danger');
+      }
+    });
   }
 
   // Manejar recuperación de contraseña
   onForgotPassword(data: { email: string }) {
-    console.log('Forgot password for:', data.email);
-    this.lastAction = 'Forgot Password';
-    this.lastData = data;
-    
-    // Simular envío de email (reemplazar con tu lógica real)
-    setTimeout(() => {
-      const mockResponse: AuthResponse = {
-        success: true,
-        message: `Se ha enviado un enlace de recuperación a ${data.email}`
-      };
-      
-      this.handleAuthResponse(mockResponse);
-    }, 1500);
+    console.log('🔑 Forgot password for:', data.email);
+    this.showToastMessage('Función no implementada aún', 'warning');
   }
 
   // Manejar login social
   onSocialLogin(data: { provider: string }) {
-    console.log('Social login with:', data.provider);
-    this.lastAction = 'Social Login';
-    this.lastData = data;
-    
-    // Simular login social (reemplazar con tu lógica real)
-    setTimeout(() => {
-      const mockResponse: AuthResponse = {
-        success: true,
-        message: `Login con ${data.provider} exitoso`,
-        user: {
-          id: '125',
-          email: `usuario@${data.provider}.com`,
-          firstName: 'Usuario',
-          lastName: 'Social',
-          token: 'mock-social-token'
-        }
-      };
-      
-      this.handleAuthResponse(mockResponse);
-    }, 1500);
+    console.log('📱 Social login with:', data.provider);
+    this.showToastMessage('Login social no implementado aún', 'warning');
   }
 
-  // Manejar respuesta de autenticación
-  handleAuthResponse(response: AuthResponse) {
-    console.log('Auth response:', response);
-    
-    if (response.success) {
-      this.showToastMessage(response.message || 'Operación exitosa', 'success');
-      
-      if (response.user) {
-        console.log('User authenticated:', response.user);
-        // Actualizar el estado de autenticación en el servicio
-        this.authService.login();
-      }
-    } else {
-      this.showToastMessage(response.error?.message || 'Error en la operación', 'danger');
-    }
+  // Login rápido con usuarios demo
+  quickLogin(demoUser: any) {
+    const loginData: LoginData = {
+      email: demoUser.email,
+      password: demoUser.password,
+      rememberMe: false
+    };
+    this.onLogin(loginData);
   }
 
-  // Mostrar toast
-  private showToastMessage(message: string, color: string = 'success') {
+  // Logout
+  onLogout() {
+    this.authService.logout();
+    this.showToastMessage('Sesión cerrada correctamente', 'success');
+    this.clearDemo();
+  }
+
+  // ===================
+  // MÉTODOS AUXILIARES
+  // ===================
+
+  private showToastMessage(message: string, color: 'success' | 'danger' | 'warning' | 'primary' = 'success') {
     this.toastMessage = message;
     this.toastColor = color;
     this.showToast = true;
   }
 
-  // Limpiar datos de demo
   clearDemo() {
     this.lastAction = '';
     this.lastData = null;
   }
 
-  // Métodos del AuthService
-  onLogout() {
-    this.authService.logout();
-    this.showToastMessage('Sesión cerrada correctamente', 'success');
+  // Obtener estado de la API como texto
+  getApiStatusText(): string {
+    switch (this.apiStatus) {
+      case 'checking': return 'Verificando...';
+      case 'connected': return 'Conectado';
+      case 'error': return 'Error de conexión';
+      default: return 'Desconocido';
+    }
   }
 
-  onToggleAuth() {
-    this.authService.toggleLogin();
-    const status = this.authService.isAuthenticated() ? 'Sesión iniciada' : 'Sesión cerrada';
-    this.showToastMessage(status, 'primary');
-  }
-
-  onCheckAuthState() {
-    const isAuth = this.authService.isAuthenticated();
-    const message = `Estado actual: ${isAuth ? 'Autenticado' : 'No autenticado'}`;
-    this.showToastMessage(message, 'tertiary');
+  // Obtener color del estado de la API
+  getApiStatusColor(): string {
+    switch (this.apiStatus) {
+      case 'checking': return 'warning';
+      case 'connected': return 'success';
+      case 'error': return 'danger';
+      default: return 'medium';
+    }
   }
 }
