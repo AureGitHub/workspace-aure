@@ -3,10 +3,15 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
 
 // Imports de la librería compartida
-import { AuthService, AuthComponent, AuthConfig, AuthResponse, LoginData, RegisterData } from 'shared-lib';
-
-// Services locales
-import { ApiService } from '../services/api.service';
+import { 
+  AuthService, 
+  AuthComponent, 
+  AuthConfig, 
+  LoginData, 
+  RegisterData,
+  BackendLoginRequest,
+  BackendRegisterRequest
+} from 'shared-lib';
 
 @Component({
   selector: 'app-auth-modal',
@@ -53,115 +58,122 @@ export class AuthModalComponent implements OnInit {
 
   constructor(
     private modalController: ModalController,
-    private authService: AuthService,
-    private apiService: ApiService
+    private authService: AuthService
   ) {}
 
   ngOnInit() {}
 
   async onLogin(loginData: LoginData) {
     try {
-      // Llamar al API real del backend app-alquiler
-      const response = await this.apiService.login({
+      // Usar el AuthService de shared-lib que ahora se comunica con el backend
+      const loginRequest: BackendLoginRequest = {
         email: loginData.email,
         password: loginData.password
-      }).toPromise();
+      };
 
-      if (response?.success) {
-        // Actualizar el estado de autenticación en el servicio compartido
-        this.authService.login();
-        
-        // Cerrar modal y retornar datos de éxito
-        this.modalController.dismiss({
-          success: true,
-          message: 'Inicio de sesión exitoso',
-          user: response.user
-        });
-      } else {
-        // Mostrar error en el AuthComponent
-        this.showError(response?.message || 'Error en el inicio de sesión');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      
-      // Mejorar el manejo de errores basado en el tipo de error
-      let errorMessage = 'Error en el inicio de sesión';
-      
-      if (error.status === 401) {
-        // Error de credenciales incorrectas
-        errorMessage = 'Email o contraseña incorrectos';
-      } else if (error.status === 400) {
-        // Error de validación
-        errorMessage = 'Por favor, verifica que todos los campos estén completos';
-      } else if (error.status === 500) {
-        // Error del servidor
-        if (error.error?.code === 'SERVICE_ERROR') {
-          errorMessage = 'Servicio de autenticación temporalmente no disponible. Inténtalo más tarde.';
-        } else {
-          errorMessage = 'Error interno del servidor. Inténtalo más tarde.';
+      this.authService.loginWithCredentials(loginRequest).subscribe({
+        next: (success) => {
+          if (success) {
+            // Cerrar modal y retornar datos de éxito
+            this.modalController.dismiss({
+              success: true,
+              message: 'Inicio de sesión exitoso',
+              user: this.authService.getCurrentUser()
+            });
+          } else {
+            this.showError('Credenciales inválidas');
+          }
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+          
+          // Mejorar el manejo de errores basado en el tipo de error
+          let errorMessage = 'Error en el inicio de sesión';
+          
+          if (error.statusCode === 401) {
+            // Error de credenciales incorrectas
+            errorMessage = 'Email o contraseña incorrectos';
+          } else if (error.statusCode === 400) {
+            // Error de validación
+            errorMessage = 'Por favor, verifica que todos los campos estén completos';
+          } else if (error.statusCode === 500) {
+            // Error del servidor
+            errorMessage = 'Error interno del servidor. Inténtalo más tarde.';
+          } else if (error.statusCode === 0 || !navigator.onLine) {
+            // Error de conexión
+            errorMessage = 'Sin conexión al servidor. Verifica tu conexión a internet.';
+          } else if (error.message) {
+            // Usar el mensaje específico del servidor si está disponible
+            errorMessage = error.message;
+          }
+          
+          this.showError(errorMessage);
         }
-      } else if (error.status === 0 || !navigator.onLine) {
-        // Error de conexión
-        errorMessage = 'Sin conexión al servidor. Verifica tu conexión a internet.';
-      } else if (error.error?.message) {
-        // Usar el mensaje específico del servidor si está disponible
-        errorMessage = error.error.message;
-      }
-      
-      this.showError(errorMessage);
+      });
+    } catch (error: any) {
+      this.showError('Error en el inicio de sesión');
+      console.error('Login error:', error);
     }
   }
 
   async onRegister(registerData: RegisterData) {
     try {
-      // Llamar al API de registro
-      const response = await this.apiService.register({
+      // Usar el AuthService de shared-lib para el registro
+      const registerRequest: BackendRegisterRequest = {
         username: registerData.email.split('@')[0], // Usar parte del email como username
         email: registerData.email,
         password: registerData.password,
         first_name: registerData.firstName,
         last_name: registerData.lastName
-      }).toPromise();
+      };
 
-      if (response?.success) {
-        // Mostrar mensaje de éxito
-        this.modalController.dismiss({
-          success: true,
-          message: 'Registro exitoso. Ahora puedes iniciar sesión'
-        });
-      } else {
-        this.showError(response?.message || 'Error en el registro');
-      }
-    } catch (error: any) {
-      console.error('Register error:', error);
-      
-      // Mejorar el manejo de errores para registro
-      let errorMessage = 'Error en el registro';
-      
-      if (error.status === 400) {
-        // Error de validación
-        if (error.error?.message?.includes('email')) {
-          errorMessage = 'El email ya está registrado o tiene un formato inválido';
-        } else if (error.error?.message?.includes('password')) {
-          errorMessage = 'La contraseña no cumple con los requisitos mínimos';
-        } else {
-          errorMessage = 'Por favor, verifica que todos los campos estén completos y sean válidos';
+      this.authService.registerUser(registerRequest).subscribe({
+        next: (success) => {
+          if (success) {
+            // Mostrar mensaje de éxito
+            this.modalController.dismiss({
+              success: true,
+              message: 'Registro exitoso. Ahora puedes iniciar sesión'
+            });
+          } else {
+            this.showError('Error en el registro');
+          }
+        },
+        error: (error) => {
+          console.error('Register error:', error);
+          
+          // Mejorar el manejo de errores para registro
+          let errorMessage = 'Error en el registro';
+          
+          if (error.statusCode === 400) {
+            // Error de validación
+            if (error.message?.includes('email')) {
+              errorMessage = 'El email ya está registrado o tiene un formato inválido';
+            } else if (error.message?.includes('password')) {
+              errorMessage = 'La contraseña no cumple con los requisitos mínimos';
+            } else {
+              errorMessage = 'Por favor, verifica que todos los campos estén completos y sean válidos';
+            }
+          } else if (error.statusCode === 409) {
+            // Conflicto - usuario ya existe
+            errorMessage = 'Este email ya está registrado. Intenta iniciar sesión en su lugar.';
+          } else if (error.statusCode === 500) {
+            // Error del servidor
+            errorMessage = 'Error interno del servidor. Inténtalo más tarde.';
+          } else if (error.statusCode === 0 || !navigator.onLine) {
+            // Error de conexión
+            errorMessage = 'Sin conexión al servidor. Verifica tu conexión a internet.';
+          } else if (error.message) {
+            // Usar el mensaje específico del servidor si está disponible
+            errorMessage = error.message;
+          }
+          
+          this.showError(errorMessage);
         }
-      } else if (error.status === 409) {
-        // Conflicto - usuario ya existe
-        errorMessage = 'Este email ya está registrado. Intenta iniciar sesión en su lugar.';
-      } else if (error.status === 500) {
-        // Error del servidor
-        errorMessage = 'Error interno del servidor. Inténtalo más tarde.';
-      } else if (error.status === 0 || !navigator.onLine) {
-        // Error de conexión
-        errorMessage = 'Sin conexión al servidor. Verifica tu conexión a internet.';
-      } else if (error.error?.message) {
-        // Usar el mensaje específico del servidor si está disponible
-        errorMessage = error.error.message;
-      }
-      
-      this.showError(errorMessage);
+      });
+    } catch (error: any) {
+      this.showError('Error en el registro');
+      console.error('Register error:', error);
     }
   }
 

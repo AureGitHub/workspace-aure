@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -6,7 +6,7 @@ import { arrowBack, personCircle, person, logIn, logOut, menu, close } from 'ion
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { AuthComponent } from '../auth/auth.component';
-import { LoginData, RegisterData, AuthResponse } from '../auth/auth.interfaces';
+import { LoginData, RegisterData, AuthResponse, BackendLoginRequest } from '../auth/auth.interfaces';
 
 export interface AppLayoutConfig {
   showHeader?: boolean;
@@ -57,11 +57,12 @@ export interface AppLayoutConfig {
             *ngIf="config.showUserProfile"
             fill="clear"
             (click)="onUserProfileClick()"
-            [color]="isAuthenticated ? 'primary' : 'medium'">
+            [color]="isAuthenticated ? 'light' : 'medium'">
             <ion-icon 
               [name]="getUserIcon()" 
               slot="icon-only"
-              [style.opacity]="isAuthenticated ? '1' : '0.5'">
+              [style.opacity]="isAuthenticated ? '1' : '0.5'"
+              [color]="isAuthenticated ? 'light' : 'medium'">
             </ion-icon>
           </ion-button>
           <ng-content select="[slot=header-actions]"></ng-content>
@@ -138,6 +139,7 @@ export interface AppLayoutConfig {
         
         <!-- Componente de Autenticación como Modal completo -->
         <lib-auth 
+          #authComponent
           *ngIf="!isAuthenticated"
           [config]="authConfig"
           (login)="onAuthLogin($event)"
@@ -299,6 +301,8 @@ export interface AppLayoutConfig {
   `]
 })
 export class AppLayoutComponent implements OnInit, OnDestroy {
+  @ViewChild('authComponent') authComponent?: AuthComponent;
+
   @Input() config: AppLayoutConfig = {
     showHeader: true,
     showFooter: true,
@@ -348,7 +352,10 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Suscribirse al estado de autenticación
+    // Obtener estado inicial inmediatamente
+    this.isAuthenticated = this.authService.isLoggedIn();
+    
+    // Suscribirse al estado de autenticación para cambios futuros
     this.authSubscription = this.authService.isLogin$.subscribe(isLoggedIn => {
       this.isAuthenticated = isLoggedIn;
     });
@@ -391,14 +398,55 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
 
   // Métodos de autenticación
   onAuthLogin(loginData: LoginData) {
-    // Simular autenticación exitosa
-    this.authService.login();
-    this.authLogin.emit(loginData);
-    
-    // Cerrar modal después de un breve delay
-    setTimeout(() => {
-      this.closeAuthModal();
-    }, 1000);
+    // Usar el método que se conecta al backend
+    const loginRequest: BackendLoginRequest = {
+      email: loginData.email,
+      password: loginData.password
+    };
+
+    this.authService.loginWithCredentials(loginRequest).subscribe({
+      next: (success) => {
+        if (success) {
+          // El AuthService ya actualizó su estado interno
+          // Solo emitir el evento y cerrar modal
+          this.authLogin.emit(loginData);
+          // Cerrar modal después de un breve delay
+          setTimeout(() => {
+            this.closeAuthModal();
+          }, 1000);
+        } else {
+          // Desbloquear el AuthComponent y mostrar error
+          if (this.authComponent) {
+            this.authComponent.setLoading(false);
+            this.authComponent.handleAuthResponse({
+              success: false,
+              message: 'Credenciales inválidas: Email o contraseña incorrectos',
+              error: {
+                code: 'INVALID_CREDENTIALS',
+                message: 'Email o contraseña incorrectos'
+                // No especificamos 'field' para evitar conflictos con validación
+              }
+            });
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Login error:', error);
+        // Desbloquear el AuthComponent y mostrar error
+        if (this.authComponent) {
+          this.authComponent.setLoading(false);
+          this.authComponent.handleAuthResponse({
+            success: false,
+            message: error.message || 'Error de conexión con el servidor',
+            error: {
+              code: 'CONNECTION_ERROR',
+              message: error.message || 'No se pudo conectar con el servidor'
+              // No especificamos 'field' para evitar conflictos con validación
+            }
+          });
+        }
+      }
+    });
   }
 
   onAuthRegister(registerData: RegisterData) {

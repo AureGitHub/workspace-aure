@@ -5,15 +5,20 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 // Imports de la librería compartida
-import { AuthService, AuthComponent, AuthConfig, AuthResponse, LoginData, RegisterData, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
-
-// Services locales
-import { ApiService } from '../services/api.service';
+import { 
+  AuthService, 
+  AuthComponent, 
+  AuthConfig, 
+  LoginData, 
+  RegisterData,
+  User,
+  BackendLoginRequest
+} from 'shared-lib';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, IonicModule, AuthComponent, AppLayoutComponent],
+  imports: [CommonModule, IonicModule, AuthComponent],
   template: `
     <!-- Componente de autenticación (modal) -->
     <ion-modal 
@@ -405,7 +410,6 @@ export class UserManagementPage implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private apiService: ApiService,
     private router: Router,
     private modalController: ModalController
   ) {}
@@ -509,21 +513,27 @@ export class UserManagementPage implements OnInit, OnDestroy {
   // Eventos de autenticación
   async onLogin(loginData: LoginData) {
     try {
-      // Llamar al API real del backend app-alquiler
-      const response = await this.apiService.login({
+      // Usar el AuthService de shared-lib que ahora se comunica con el backend
+      const loginRequest: BackendLoginRequest = {
         email: loginData.email,
         password: loginData.password
-      }).toPromise();
+      };
 
-      if (response?.success) {
-        // Actualizar el estado de autenticación en el servicio compartido
-        this.authService.login();
-        this.showToastMessage('Inicio de sesión exitoso', 'success');
-      } else {
-        this.showToastMessage(response?.message || 'Error en el inicio de sesión', 'danger');
-      }
+      this.authService.loginWithCredentials(loginRequest).subscribe({
+        next: (success) => {
+          if (success) {
+            this.showToastMessage('Inicio de sesión exitoso', 'success');
+          } else {
+            this.showToastMessage('Credenciales inválidas', 'danger');
+          }
+        },
+        error: (error) => {
+          this.showToastMessage(error.message || 'Error en el inicio de sesión', 'danger');
+          console.error('Login error:', error);
+        }
+      });
     } catch (error: any) {
-      this.showToastMessage(error.friendlyMessage || 'Error en el inicio de sesión', 'danger');
+      this.showToastMessage('Error en el inicio de sesión', 'danger');
       console.error('Login error:', error);
     }
   }
@@ -549,10 +559,7 @@ export class UserManagementPage implements OnInit, OnDestroy {
   }
 
   logout() {
-    // Cerrar sesión en el API del backend
-    this.apiService.logout();
-    
-    // Cerrar sesión en el servicio de autenticación compartido
+    // Cerrar sesión usando el AuthService de shared-lib
     this.authService.logout();
     
     this.showToastMessage('Sesión cerrada', 'success');

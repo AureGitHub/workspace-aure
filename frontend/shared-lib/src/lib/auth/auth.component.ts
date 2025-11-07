@@ -60,6 +60,16 @@ import {
           </p>
         </div>
 
+        <!-- Errores Generales -->
+        <div class="general-errors" *ngIf="state.errors.length > 0">
+          <div 
+            *ngFor="let error of state.errors" 
+            class="error-item">
+            <ion-icon name="close-circle" color="danger"></ion-icon>
+            <span class="error-text">{{ error.message }}</span>
+          </div>
+        </div>
+
         <div class="auth-form-container">
           <!-- Formulario de Login -->
           <form [formGroup]="loginForm" *ngIf="state.mode === 'login'" (ngSubmit)="onLogin()">
@@ -410,6 +420,28 @@ import {
       padding-left: 16px;
     }
 
+    .general-errors {
+      margin-bottom: 16px;
+    }
+
+    .error-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: #ffebee;
+      border: 1px solid var(--ion-color-danger, #eb445a);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .error-text {
+      color: var(--ion-color-danger, #d32f2f);
+      font-size: 0.9rem;
+      font-weight: 500;
+      flex: 1;
+    }
+
     .auth-button {
       margin: 16px 0 8px;
       --border-radius: 8px;
@@ -698,6 +730,7 @@ export class AuthComponent implements OnInit, OnDestroy {
   onLogin() {
     if (this.loginForm.valid && !this.state.loading) {
       this.state.loading = true;
+      this.state.errors = []; // Limpiar errores previos
       const loginData: LoginData = this.loginForm.value;
       this.login.emit(loginData);
     }
@@ -739,6 +772,12 @@ export class AuthComponent implements OnInit, OnDestroy {
         if (field) {
           field.setErrors({ serverError: response.error.message });
         }
+      } else {
+        // Manejar errores generales
+        this.state.errors = [{
+          field: 'general',
+          message: response.error.message || response.message || 'Error desconocido'
+        }];
       }
     }
   }

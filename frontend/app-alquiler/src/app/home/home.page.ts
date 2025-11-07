@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
@@ -19,9 +19,6 @@ import {
 
 // Imports de la librería compartida
 import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
-
-// Componente modal local
-import { AuthModalComponent } from '../components/auth-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -332,8 +329,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService,
-    private modalController: ModalController
+    private authService: AuthService
   ) {
     // Registrar iconos de Ionicons
     addIcons({
@@ -368,40 +364,14 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
-  // Método para abrir el modal de autenticación
-  async openAuthModal() {
+  goToAuth() {
     if (this.isAuthenticated) {
       // Si ya está autenticado, ir directamente a user management
       this.goToUserManagement();
     } else {
-      // Si no está autenticado, abrir modal de login
-      const modal = await this.modalController.create({
-        component: AuthModalComponent,
-        backdropDismiss: true,
-        showBackdrop: true
-      });
-
-      // Manejar respuesta del modal
-      modal.onDidDismiss().then((result) => {
-        if (result.data?.success) {
-          this.showToastMessage(result.data.message, 'success');
-          if (result.data.user) {
-            // Si el login fue exitoso, navegar a user management
-            this.goToUserManagement();
-          }
-        } else if (result.data?.message) {
-          this.showToastMessage(result.data.message, 'warning');
-        }
-      });
-
-      await modal.present();
+      // Si no está autenticado, el AppLayoutComponent manejará la autenticación
+      this.showToastMessage('Por favor, inicia sesión usando el botón de perfil en el header', 'primary');
     }
-  }
-
-
-
-  goToAuth() {
-    this.openAuthModal();
   }
 
   goToUserManagement() {

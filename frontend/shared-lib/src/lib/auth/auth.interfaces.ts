@@ -60,6 +60,46 @@ export interface AuthResponse {
   };
 }
 
+// Interfaces específicas del backend
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  user_type: 'owner' | 'tenant' | 'admin';
+  is_active: boolean;
+  email_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface BackendRegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  user_type?: 'owner' | 'tenant';
+}
+
+export interface BackendAuthResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    user: User;
+    token: string;
+  };
+  timestamp?: string;
+}
+
 export interface ValidationError {
   field: string;
   message: string;
