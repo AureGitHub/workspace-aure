@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "name": "Workspace Aure",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "git.openDiffOnClick": false,
+    "git.decorations.enabled": false,
+    "scm.diffDecorations": "none",
+    "scm.autoReveal": false,
+    "diffEditor.renderSideBySide": false,
+    "workbench.editor.enablePreview": false,
+    "explorer.decorations.badges": false,
+    "explorer.decorations.colors": false
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "angular.ng-template",
+      "bradlc.vscode-tailwindcss"
+    ]
+  }
+}

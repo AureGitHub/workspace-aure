@@ -1,0 +1,7 @@
+{
+  "git.openDiffOnClick": false,
+  "git.decorations.enabled": false,
+  "diffEditor.renderSideBySide": false,
+  "scm.diffDecorations": "none",
+  "scm.autoReveal": false
+}

@@ -1,0 +1,21 @@
+{
+  "git.openDiffOnClick": false,
+  "git.decorations.enabled": false,
+  "scm.diffDecorations": "none",
+  "scm.diffDecorationsGutterVisibility": "hover",
+  "scm.autoReveal": false,
+  "diffEditor.renderSideBySide": false,
+  "diffEditor.ignoreTrimWhitespace": true,
+  "diffEditor.maxComputationTime": 0,
+  "diffEditor.renderIndicators": false,
+  "diffEditor.codeLens": false,
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "explorer.decorations.badges": false,
+  "explorer.decorations.colors": false,
+  "workbench.tree.renderIndentGuides": "none",
+  "git.enabled": true,
+  "git.autoRepositoryDetection": false,
+  "scm.defaultViewMode": "list",
+  "scm.repositories.visible": 0
+}
