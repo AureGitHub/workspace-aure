@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 // Imports de la librería compartida
-import { AuthService, AuthComponent, AuthConfig, AuthResponse, LoginData, RegisterData } from 'shared-lib';
+import { AuthService, AuthComponent, AuthConfig, AuthResponse, LoginData, RegisterData, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
 
 // Services locales
 import { ApiService } from '../services/api.service';
@@ -13,7 +13,7 @@ import { ApiService } from '../services/api.service';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, IonicModule, AuthComponent],
+  imports: [CommonModule, IonicModule, AuthComponent, AppLayoutComponent],
   template: `
     <!-- Componente de autenticación (modal) -->
     <ion-modal 
