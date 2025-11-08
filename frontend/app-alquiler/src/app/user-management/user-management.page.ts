@@ -36,24 +36,7 @@ import {
     </ion-modal>
 
     <!-- Contenido principal (solo visible si está autenticado) -->
-    <div *ngIf="isAuthenticated">
-      <ion-header>
-        <ion-toolbar color="primary">
-          <ion-buttons slot="start">
-            <ion-button (click)="goHome()">
-              <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          <ion-title>Gestión de Usuarios</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="logout()">
-              <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-content class="user-management-content">
+    <ion-content *ngIf="isAuthenticated" class="user-management-content">
         <!-- Header de bienvenida -->
         <div class="welcome-section">
           <div class="welcome-content">
@@ -196,8 +179,7 @@ import {
             Reintentar
           </ion-button>
         </div>
-      </ion-content>
-    </div>
+    </ion-content>
 
     <!-- Loading screen inicial -->
     <div *ngIf="!isAuthenticated && !showAuthModal" class="initial-loading">

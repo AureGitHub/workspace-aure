@@ -23,24 +23,10 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, IonicModule, AppLayoutComponent],
+  imports: [CommonModule, IonicModule],
   template: `
-    <lib-app-layout 
-      [config]="layoutConfig"
-      (menuClick)="onMenuClick()"
-      (backClick)="onBackClick()"
-      (userProfileClick)="onUserProfileClick()">
-      
-      <!-- Acciones del header -->
-      <div slot="header-actions">
-        <ion-button color="light" fill="outline" size="small" (click)="goToUserManagement()">
-          <ion-icon name="settings-outline" slot="start"></ion-icon>
-          Gestión
-        </ion-button>
-      </div>
-
-      <!-- Contenido principal -->
-      <div class="app-alquiler-content">
+    <!-- Contenido principal -->
+    <ion-content class="app-alquiler-content">
         <!-- Header Hero Section -->
         <div class="hero-section">
           <div class="hero-content">
@@ -144,29 +130,17 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
             </ion-item>
           </ion-list>
         </div>
-      </div>
-      
-      <!-- Footer center content -->
-      <div slot="footer-center">
-        <small>App Alquiler funcionando</small>
-      </div>
-      
-      <!-- Footer actions -->
-      <div slot="footer-actions">
-        <small>v1.0.0</small>
-      </div>
-
-      <!-- Toast para mensajes -->
-      <ion-toast 
-        [isOpen]="showToast"
-        [message]="toastMessage"
-        [duration]="3000"
-        [color]="toastColor"
-        position="bottom"
-        (didDismiss)="showToast = false">
-      </ion-toast>
-      
-    </lib-app-layout>
+        
+        <!-- Toast para mensajes -->
+        <ion-toast 
+          [isOpen]="showToast"
+          [message]="toastMessage"
+          [duration]="3000"
+          [color]="toastColor"
+          position="bottom"
+          (didDismiss)="showToast = false">
+        </ion-toast>
+    </ion-content>
   `,
   styles: [`
     .app-alquiler-content {
@@ -313,9 +287,9 @@ export class HomePage implements OnInit, OnDestroy {
   layoutConfig: AppLayoutConfig = {
     showHeader: true,
     showFooter: true,
-    headerTitle: 'App Alquiler',
+    headerTitle: 'Alquiler ZarZa',
     headerSubtitle: 'Gestión de propiedades de alquiler',
-    footerText: 'App Alquiler © 2025',
+    footerText: 'Alquiler ZarZa © 2025',
     showBackButton: false,
     showMenuButton: false,
     showUserProfile: true,

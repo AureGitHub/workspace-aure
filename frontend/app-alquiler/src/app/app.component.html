@@ -1,3 +1,22 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <lib-app-layout 
+    [config]="layoutConfig"
+    (menuClick)="onMenuClick()"
+    (backClick)="onBackClick()"
+    (userProfileClick)="onUserProfileClick()"
+    (authLogin)="onAuthLogin($event)"
+    (authRegister)="onAuthRegister($event)">
+    
+    <!-- El contenido de cada página se renderiza aquí -->
+    <ion-router-outlet></ion-router-outlet>
+    
+    <!-- Footer común -->
+    <div slot="footer-center">
+      <small>App Alquiler © 2025</small>
+    </div>
+    
+    <div slot="footer-actions">
+      <small>v1.0.0</small>
+    </div>
+  </lib-app-layout>
 </ion-app>
