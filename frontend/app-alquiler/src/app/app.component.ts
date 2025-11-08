@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonApp, IonRouterOutlet, IonContent } from '@ionic/angular/standalone';
+import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
@@ -15,7 +15,7 @@ import {
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet, IonContent, AppLayoutComponent],
+  imports: [IonApp, IonRouterOutlet, AppLayoutComponent],
 })
 export class AppComponent implements OnInit, OnDestroy {
   

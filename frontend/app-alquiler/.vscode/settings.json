@@ -1,7 +1,5 @@
 {
-  "git.openDiffOnClick": false,
-  "git.decorations.enabled": false,
-  "diffEditor.renderSideBySide": false,
-  "scm.diffDecorations": "none",
-  "scm.autoReveal": false
-}
+    "deno.enable": true,
+    "deno.unstable": true,
+    "angular.enable-strict-mode-prompt": false
+  }

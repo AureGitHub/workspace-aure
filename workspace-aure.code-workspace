@@ -1,25 +1,34 @@
 {
   "folders": [
     {
-      "name": "Workspace Aure",
       "path": "."
     }
   ],
   "settings": {
+    "git.enabled": true,
     "git.openDiffOnClick": false,
-    "git.decorations.enabled": false,
-    "scm.diffDecorations": "none",
-    "scm.autoReveal": false,
+    "git.openDiffView": false,
     "diffEditor.renderSideBySide": false,
     "workbench.editor.enablePreview": false,
-    "explorer.decorations.badges": false,
-    "explorer.decorations.colors": false
-  },
-  "extensions": {
-    "recommendations": [
-      "ms-vscode.vscode-typescript-next",
-      "angular.ng-template",
-      "bradlc.vscode-tailwindcss"
-    ]
+    "workbench.editor.showTabs": "single",
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "editor.codeLens": false,
+    "breadcrumbs.enabled": false,
+    "editor.minimap.enabled": false,
+    "workbench.statusBar.visible": true,
+    "editor.renderWhitespace": "none",
+    "editor.renderControlCharacters": false,
+    "editor.rulers": [],
+    "workbench.editor.decorations.badges": false,
+    "workbench.editor.decorations.colors": false,
+    "workbench.editor.tabActionLocation": "right",
+    "workbench.editor.tabCloseButton": "off",
+    "editor.lightbulb.enabled": "off",
+    "editor.glyphMargin": false,
+    "editor.folding": false,
+    "editor.showFoldingControls": "mouseover",
+    "editor.contextmenu": false,
+    "workbench.editor.enablePreviewFromCodeNavigation": false,
+    "workbench.editor.tabActionCloseVisibility": false
   }
 }
