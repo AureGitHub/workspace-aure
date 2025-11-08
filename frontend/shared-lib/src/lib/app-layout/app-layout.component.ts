@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild } 
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { arrowBack, personCircle, person, logIn, logOut, menu, close } from 'ionicons/icons';
+import { arrowBack, personCircle, person, logIn, logOut, menu, close, mail, shieldCheckmark, codeOutline, copyOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { AuthComponent } from '../auth/auth.component';
@@ -122,15 +122,94 @@ export interface AppLayoutConfig {
             <div class="user-profile">
               <ion-card>
                 <ion-card-header>
-                  <ion-card-title>¡Bienvenido!</ion-card-title>
-                  <ion-card-subtitle>Sesión activa</ion-card-subtitle>
+                  <ion-card-title>¡Bienvenido, Sesión Activa!</ion-card-title>
+                  <ion-card-subtitle>Información del usuario</ion-card-subtitle>
                 </ion-card-header>
                 <ion-card-content>
-                  <p>Has iniciado sesión correctamente.</p>
-                  <ion-button expand="block" color="danger" (click)="onLogout()">
+                  <div *ngIf="currentUser" class="user-details">
+                    <div class="user-info-item">
+                      <ion-icon name="person" color="primary"></ion-icon>
+                      <span class="info-label">Nombre:</span>
+                      <span class="info-value">{{ currentUser.first_name }} {{ currentUser.last_name }}</span>
+                    </div>
+                    
+                    <div class="user-info-item">
+                      <ion-icon name="mail" color="secondary"></ion-icon>
+                      <span class="info-label">Email:</span>
+                      <span class="info-value">{{ currentUser.email }}</span>
+                    </div>
+                    
+                    <div class="user-info-item">
+                      <ion-icon name="shield-checkmark" [color]="getRoleColor(currentUser.user_type)"></ion-icon>
+                      <span class="info-label">Rol:</span>
+                      <ion-chip [color]="getRoleColor(currentUser.user_type)" class="role-chip">
+                        {{ getRoleLabel(currentUser.user_type) }}
+                      </ion-chip>
+                    </div>
+                  </div>
+                  
+                  <ion-button expand="block" color="danger" (click)="onLogout()" class="logout-button">
                     <ion-icon name="log-out" slot="start"></ion-icon>
                     Cerrar Sesión
                   </ion-button>
+                </ion-card-content>
+              </ion-card>
+
+              <!-- Sección de Debug JWT -->
+              <ion-card class="debug-card">
+                <ion-card-header>
+                  <ion-card-title>🛠️ Debug JWT Token</ion-card-title>
+                  <ion-card-subtitle>Información técnica del token</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-button 
+                    expand="block" 
+                    fill="outline" 
+                    color="primary" 
+                    (click)="toggleTokenInfo()">
+                    <ion-icon name="code-outline" slot="start"></ion-icon>
+                    {{ showTokenInfo ? 'Ocultar' : 'Mostrar' }} Token Info
+                  </ion-button>
+                  
+                  <div *ngIf="showTokenInfo" class="token-info">
+                    <ion-item lines="none">
+                      <ion-label>
+                        <h3>Estado de Autenticación</h3>
+                        <p>Autenticado: <strong>{{ tokenInfo?.isAuthenticated ? 'Sí' : 'No' }}</strong></p>
+                        <p>Rol Admin: <strong>{{ tokenInfo?.isAdmin ? 'Sí' : 'No' }}</strong></p>
+                        <p>Token presente: <strong>{{ tokenInfo?.hasToken ? 'Sí' : 'No' }}</strong></p>
+                        <p>Longitud token: <strong>{{ tokenInfo?.tokenLength || 0 }} chars</strong></p>
+                      </ion-label>
+                    </ion-item>
+
+                    <ion-item lines="none" *ngIf="tokenInfo?.decodedToken">
+                      <ion-label>
+                        <h3>Datos del Token JWT</h3>
+                        <p><strong>Email:</strong> {{ tokenInfo.decodedToken.email || 'N/A' }}</p>
+                        <p><strong>User ID:</strong> {{ tokenInfo.decodedToken.user_id || tokenInfo.decodedToken.sub || 'N/A' }}</p>
+                        <p><strong>Rol:</strong> {{ tokenInfo.decodedToken.user_type || 'N/A' }}</p>
+                        <p><strong>Emitido:</strong> {{ formatDate(tokenInfo.decodedToken.iat) }}</p>
+                        <p><strong>Expira:</strong> {{ formatDate(tokenInfo.decodedToken.exp) }}</p>
+                      </ion-label>
+                    </ion-item>
+
+                    <ion-item lines="none">
+                      <ion-label>
+                        <h3>Token JWT (Primeros 100 chars)</h3>
+                        <p class="token-preview">{{ getTokenPreview() }}</p>
+                      </ion-label>
+                    </ion-item>
+
+                    <ion-button 
+                      expand="block" 
+                      fill="clear" 
+                      size="small"
+                      color="medium"
+                      (click)="copyTokenToClipboard()">
+                      <ion-icon name="copy-outline" slot="start"></ion-icon>
+                      Copiar Token Completo
+                    </ion-button>
+                  </div>
                 </ion-card-content>
               </ion-card>
             </div>
@@ -292,11 +371,81 @@ export interface AppLayoutConfig {
       text-align: center;
     }
 
+    .user-details {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .user-info-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      min-width: 60px;
+    }
+
+    .info-value {
+      flex: 1;
+      color: var(--ion-color-medium);
+    }
+
+    .role-chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .logout-button {
+      margin-top: 20px;
+    }
+
     /* Responsive modal */
     @media (max-width: 768px) {
       .user-profile-modal {
         height: 100vh;
       }
+    }
+
+    /* Estilos para debug del token */
+    .debug-card {
+      margin-top: 20px;
+      border: 1px dashed var(--ion-color-medium);
+    }
+
+    .token-info {
+      margin-top: 15px;
+    }
+
+    .token-info ion-item {
+      --background: var(--ion-color-light);
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .token-info h3 {
+      color: var(--ion-color-primary);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .token-info p {
+      font-size: 0.8rem;
+      margin: 2px 0;
+      line-height: 1.4;
+    }
+
+    .token-preview {
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      word-break: break-all;
+      background: var(--ion-color-light);
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--ion-color-medium);
     }
   `]
 })
@@ -323,7 +472,13 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   // Estado de autenticación
   isAuthenticated = false;
   showAuthModal = false;
+  currentUser: any = null;
   private authSubscription?: Subscription;
+  private userSubscription?: Subscription;
+
+  // Estado del debug de token
+  showTokenInfo = false;
+  tokenInfo: any = null;
 
   // Configuración del componente de autenticación
   authConfig = {
@@ -347,17 +502,33 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
       'log-in': logIn,
       'log-out': logOut,
       menu,
-      close
+      close,
+      mail,
+      'shield-checkmark': shieldCheckmark,
+      'code-outline': codeOutline,
+      'copy-outline': copyOutline
     });
   }
 
   ngOnInit() {
     // Obtener estado inicial inmediatamente
     this.isAuthenticated = this.authService.isLoggedIn();
+    if (this.isAuthenticated) {
+      this.currentUser = this.authService.getCurrentUser();
+    }
     
     // Suscribirse al estado de autenticación para cambios futuros
     this.authSubscription = this.authService.isLogin$.subscribe(isLoggedIn => {
       this.isAuthenticated = isLoggedIn;
+      if (!isLoggedIn) {
+        this.currentUser = null;
+      }
+    });
+
+    // Suscribirse específicamente a cambios en el usuario actual
+    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      console.log('🔄 Usuario actualizado en layout:', user);
     });
   }
 
@@ -365,6 +536,9 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
     // Limpiar suscripciones
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
+    }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
     }
   }
 
@@ -407,8 +581,11 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
     this.authService.loginWithCredentials(loginRequest).subscribe({
       next: (success) => {
         if (success) {
-          // El AuthService ya actualizó su estado interno
-          // Solo emitir el evento y cerrar modal
+          // Forzar actualización del usuario actual
+          this.currentUser = this.authService.getCurrentUser();
+          console.log('✅ Login exitoso, usuario actual:', this.currentUser);
+          
+          // Emitir el evento y cerrar modal
           this.authLogin.emit(loginData);
           // Cerrar modal después de un breve delay
           setTimeout(() => {
@@ -479,5 +656,68 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   onLogout() {
     this.authService.logout();
     this.closeAuthModal();
+  }
+
+  // Métodos para el manejo de roles
+  getRoleColor(userType: string): string {
+    switch (userType) {
+      case 'admin': return 'danger';
+      case 'owner': return 'warning';
+      case 'tenant': return 'tertiary';
+      default: return 'primary';
+    }
+  }
+
+  getRoleLabel(userType: string): string {
+    switch (userType) {
+      case 'admin': return 'Administrador';
+      case 'owner': return 'Propietario';
+      case 'tenant': return 'Inquilino';
+      default: return 'Usuario';
+    }
+  }
+
+  // Métodos para el debug del token JWT
+  toggleTokenInfo() {
+    this.showTokenInfo = !this.showTokenInfo;
+    if (this.showTokenInfo) {
+      this.tokenInfo = this.authService.getTokenInfo();
+      console.log('🛠️ Token Info:', this.tokenInfo);
+    }
+  }
+
+  formatDate(timestamp: number): string {
+    if (!timestamp) return 'N/A';
+    return new Date(timestamp * 1000).toLocaleString('es-ES');
+  }
+
+  getTokenPreview(): string {
+    const token = this.authService.getToken();
+    if (!token) return 'No hay token';
+    return token.substring(0, 100) + '...';
+  }
+
+  async copyTokenToClipboard() {
+    const token = this.authService.getToken();
+    if (!token) {
+      console.log('No hay token para copiar');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(token);
+      console.log('✅ Token copiado al portapapeles');
+      // Aquí podrías mostrar un toast de confirmación
+    } catch (error) {
+      console.error('❌ Error al copiar token:', error);
+      // Fallback para navegadores más antiguos
+      const textArea = document.createElement('textarea');
+      textArea.value = token;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      console.log('✅ Token copiado al portapapeles (fallback)');
+    }
   }
 }

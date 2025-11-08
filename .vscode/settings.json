@@ -27,5 +27,6 @@
   "git.autoRepositoryDetection": true,
   "scm.defaultViewMode": "list",
   "scm.repositories.visible": 1,
-  "files.autoSave": "afterDelay"
+  "files.autoSave": "afterDelay",
+  "workbench.editor.restoreViewState": false
 }

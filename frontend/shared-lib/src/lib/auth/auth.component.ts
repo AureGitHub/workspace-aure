@@ -13,7 +13,8 @@ import {
   logoFacebook, 
   logoApple,
   checkmark,
-  close
+  close,
+  codeOutline
 } from 'ionicons/icons';
 
 import { 
@@ -71,6 +72,19 @@ import {
         </div>
 
         <div class="auth-form-container">
+          <!-- Banner de Desarrollo -->
+          <ion-card *ngIf="isDevelopmentMode()" class="dev-banner">
+            <ion-card-content>
+              <div class="dev-banner-content">
+                <ion-icon name="code-outline" color="warning"></ion-icon>
+                <div class="dev-text">
+                  <strong>Modo Desarrollo</strong>
+                  <p>Credenciales precargadas: admin@test.com / admin123</p>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
           <!-- Formulario de Login -->
           <form [formGroup]="loginForm" *ngIf="state.mode === 'login'" (ngSubmit)="onLogin()">
             <!-- Email -->
@@ -504,6 +518,47 @@ import {
       font-size: 0.9rem;
     }
 
+    /* Estilos del banner de desarrollo */
+    .dev-banner {
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--ion-color-warning-tint) 0%, var(--ion-color-warning) 100%);
+      border: 2px dashed var(--ion-color-warning-shade);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+    }
+
+    .dev-banner ion-card-content {
+      padding: 12px 16px;
+    }
+
+    .dev-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dev-banner-content ion-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .dev-text {
+      flex: 1;
+    }
+
+    .dev-text strong {
+      color: var(--ion-color-warning-contrast);
+      font-size: 1rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .dev-text p {
+      color: var(--ion-color-warning-contrast);
+      font-size: 0.85rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .auth-modal-content {
@@ -576,7 +631,8 @@ export class AuthComponent implements OnInit, OnDestroy {
       'logo-facebook': logoFacebook,
       'logo-apple': logoApple,
       checkmark,
-      close
+      close,
+      'code-outline': codeOutline
     });
   }
 
@@ -589,12 +645,24 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   private initializeForms() {
-    // Login Form
+    // Login Form - Precargar credenciales de desarrollo
+    const isDevelopment = !window.location.href.includes('prod') && 
+                         (window.location.href.includes('localhost') || 
+                          window.location.href.includes('127.0.0.1'));
+    
+    const defaultEmail = isDevelopment ? 'admin@test.com' : '';
+    const defaultPassword = isDevelopment ? 'admin123' : '';
+    
     this.loginForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(this.config.minPasswordLength || 6)]],
+      email: [defaultEmail, [Validators.required, Validators.email]],
+      password: [defaultPassword, [Validators.required, Validators.minLength(this.config.minPasswordLength || 6)]],
       rememberMe: [false]
     });
+
+    console.log('🔧 Modo desarrollo detectado:', isDevelopment);
+    if (isDevelopment) {
+      console.log('🔑 Credenciales precargadas: admin@test.com / admin123');
+    }
 
     // Register Form
     this.registerForm = this.formBuilder.group({
@@ -810,5 +878,12 @@ export class AuthComponent implements OnInit, OnDestroy {
   // Método para cerrar el modal
   onClose() {
     this.close.emit();
+  }
+
+  // Método para detectar modo desarrollo
+  isDevelopmentMode(): boolean {
+    return !window.location.href.includes('prod') && 
+           (window.location.href.includes('localhost') || 
+            window.location.href.includes('127.0.0.1'));
   }
 }

@@ -140,8 +140,10 @@ export class AuthService {
    * Método para hacer logout
    */
   logout(): void {
+    // Limpiar completamente el estado
+    console.log('👋 Cerrando sesión...');
     this.setLoginState(false, null);
-    console.log('👋 Sesión cerrada');
+    console.log('✅ Sesión cerrada completamente');
   }
 
   /**
@@ -184,6 +186,57 @@ export class AuthService {
    */
   isAdmin(): boolean {
     return this.getCurrentUser()?.user_type === 'admin';
+  }
+
+  /**
+   * Decodifica el token JWT y retorna el payload
+   */
+  decodeToken(): any {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      // Un JWT tiene 3 partes separadas por puntos: header.payload.signature
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.error('Token JWT malformado');
+        return null;
+      }
+
+      // Decodificar la parte del payload (segunda parte)
+      const payload = parts[1];
+      // Agregar padding si es necesario
+      const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+      const decodedPayload = atob(paddedPayload);
+      
+      return JSON.parse(decodedPayload);
+    } catch (error) {
+      console.error('Error al decodificar token JWT:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Obtiene información completa del token y usuario para debugging
+   */
+  getTokenInfo(): any {
+    const token = this.getToken();
+    const user = this.getCurrentUser();
+    const decodedToken = this.decodeToken();
+
+    return {
+      hasToken: !!token,
+      token: token,
+      tokenLength: token ? token.length : 0,
+      user: user,
+      decodedToken: decodedToken,
+      isAuthenticated: this.isAuthenticated(),
+      isAdmin: this.isAdmin(),
+      isOwner: this.isOwner(),
+      isTenant: this.isTenant()
+    };
   }
 
   /**

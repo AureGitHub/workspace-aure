@@ -14,7 +14,8 @@ import {
   checkmarkCircleOutline,
   phonePortraitOutline,
   headsetOutline,
-  personOutline
+  personOutline,
+  cardOutline
 } from 'ionicons/icons';
 
 // Imports de la librería compartida
@@ -31,15 +32,15 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
         <div class="hero-section">
           <div class="hero-content">
             <ion-icon name="home-outline" class="hero-icon"></ion-icon>
-            <h1>Bienvenido a App Alquiler</h1>
-            <p>La plataforma más completa para gestionar tus propiedades de alquiler</p>
+            <h1>Bienvenido a Alquiler ZarZa</h1>
+            <p>La plataforma más completa para gestionar los alquileres de Felipe</p>
           </div>
         </div>
 
         <!-- Features Section -->
-        <div class="features-section">
+        <div class="features-section" *ngIf="isAuthenticated">
           <ion-grid>
-            <ion-row>
+            <ion-row class="ion-justify-content-center">
               <ion-col size="12" size-md="4">
                 <ion-card class="feature-card">
                   <ion-card-content>
@@ -53,19 +54,19 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
               <ion-col size="12" size-md="4">
                 <ion-card class="feature-card">
                   <ion-card-content>
-                    <ion-icon name="people-outline" color="secondary" class="feature-icon"></ion-icon>
-                    <h3>Control de Inquilinos</h3>
-                    <p>Gestiona contratos, pagos y comunicación con inquilinos</p>
+                    <ion-icon name="card-outline" color="tertiary" class="feature-icon"></ion-icon>
+                    <h3>Gestión de alquileres</h3>
+                    <p>Controla todos los contratos y pagos de alquiler</p>
                   </ion-card-content>
                 </ion-card>
               </ion-col>
               
-              <ion-col size="12" size-md="4">
+              <ion-col size="12" size-md="4" *ngIf="isAdmin">
                 <ion-card class="feature-card">
                   <ion-card-content>
-                    <ion-icon name="analytics-outline" color="tertiary" class="feature-icon"></ion-icon>
-                    <h3>Reportes y Analytics</h3>
-                    <p>Obtén insights detallados sobre tu negocio inmobiliario</p>
+                    <ion-icon name="people-outline" color="secondary" class="feature-icon"></ion-icon>
+                    <h3>Control de usuarios</h3>
+                    <p>Usuarios con acceso a la app</p>
                   </ion-card-content>
                 </ion-card>
               </ion-col>
@@ -73,63 +74,6 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
           </ion-grid>
         </div>
 
-        <!-- CTA Section -->
-        <div class="cta-section">
-          <ion-card class="cta-card">
-            <ion-card-content class="cta-content">
-              <h2>¿Listo para comenzar?</h2>
-              <p>Únete a miles de propietarios que ya confían en nuestra plataforma</p>
-              <div class="cta-buttons">
-                <ion-button 
-                  expand="block" 
-                  color="primary" 
-                  size="large"
-                  (click)="goToAuth()">
-                  <ion-icon name="log-in-outline" slot="start"></ion-icon>
-                  Iniciar Sesión
-                </ion-button>
-                <ion-button 
-                  expand="block" 
-                  fill="outline" 
-                  color="primary" 
-                  size="large"
-                  (click)="goToUserManagement()">
-                  <ion-icon name="settings-outline" slot="start"></ion-icon>
-                  Ver Gestión de Usuarios
-                </ion-button>
-              </div>
-            </ion-card-content>
-          </ion-card>
-        </div>
-
-        <!-- Info Section -->
-        <div class="info-section">
-          <ion-list lines="none">
-            <ion-item>
-              <ion-icon name="checkmark-circle-outline" color="success" slot="start"></ion-icon>
-              <ion-label>
-                <h3>100% Seguro</h3>
-                <p>Tus datos están protegidos con la mejor seguridad</p>
-              </ion-label>
-            </ion-item>
-            
-            <ion-item>
-              <ion-icon name="phone-portrait-outline" color="primary" slot="start"></ion-icon>
-              <ion-label>
-                <h3>Multiplataforma</h3>
-                <p>Accede desde cualquier dispositivo, en cualquier momento</p>
-              </ion-label>
-            </ion-item>
-            
-            <ion-item>
-              <ion-icon name="headset-outline" color="secondary" slot="start"></ion-icon>
-              <ion-label>
-                <h3>Soporte 24/7</h3>
-                <p>Nuestro equipo está aquí para ayudarte cuando lo necesites</p>
-              </ion-label>
-            </ion-item>
-          </ion-list>
-        </div>
         
         <!-- Toast para mensajes -->
         <ion-toast 
@@ -281,7 +225,9 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
 export class HomePage implements OnInit, OnDestroy {
   // Estado de autenticación
   isAuthenticated = false;
+  isAdmin = false;
   private authSubscription?: Subscription;
+  private userSubscription?: Subscription;
 
   // Configuración del layout
   layoutConfig: AppLayoutConfig = {
@@ -316,12 +262,21 @@ export class HomePage implements OnInit, OnDestroy {
       'checkmark-circle-outline': checkmarkCircleOutline,
       'phone-portrait-outline': phonePortraitOutline,
       'headset-outline': headsetOutline,
-      'person-outline': personOutline
+      'person-outline': personOutline,
+      'card-outline': cardOutline
     });
   }
 
   ngOnInit() {
     console.log('Home page loaded');
+    
+    // Obtener estado inicial inmediatamente
+    this.isAuthenticated = this.authService.isLoggedIn();
+    this.isAdmin = this.isAuthenticated ? this.authService.isAdmin() : false;
+    
+    const currentUser = this.authService.getCurrentUser();
+    console.log('🏠 Estado inicial home - isAuthenticated:', this.isAuthenticated, 'isAdmin:', this.isAdmin, 'user:', currentUser);
+    
     this.checkAuthentication();
   }
 
@@ -329,12 +284,26 @@ export class HomePage implements OnInit, OnDestroy {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   private checkAuthentication() {
     // Suscribirse a cambios en el estado de autenticación
     this.authSubscription = this.authService.isLogin$.subscribe(isLoggedIn => {
       this.isAuthenticated = isLoggedIn;
+      
+      // Verificar si el usuario es admin usando el método del servicio
+      this.isAdmin = isLoggedIn ? this.authService.isAdmin() : false;
+      console.log('🔐 Estado auth actualizado - isAuthenticated:', this.isAuthenticated, 'isAdmin:', this.isAdmin);
+    });
+
+    // Suscribirse también a cambios del usuario actual
+    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+      // Recalcular isAdmin cuando cambie el usuario
+      this.isAdmin = user ? this.authService.isAdmin() : false;
+      console.log('👤 Usuario actualizado en home - user:', user, 'isAdmin:', this.isAdmin);
     });
   }
 
@@ -371,4 +340,5 @@ export class HomePage implements OnInit, OnDestroy {
     this.toastColor = color;
     this.showToast = true;
   }
+
 }
