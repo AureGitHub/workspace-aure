@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { ApiService } from '../api/api.service';
@@ -28,6 +28,10 @@ export class AuthService {
   // Usuario actual
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+
+  // Subject para eventos de logout
+  private logoutSubject = new Subject<void>();
+  public logout$ = this.logoutSubject.asObservable();
 
   private readonly tokenKey = 'auth_token';
   private readonly userKey = 'auth_user';
@@ -152,6 +156,9 @@ export class AuthService {
     console.log('👋 Cerrando sesión...');
     this.setLoginState(false, null);
     console.log('✅ Sesión cerrada completamente');
+    
+    // Emitir evento de logout para que la aplicación pueda reaccionar
+    this.logoutSubject.next();
   }
 
   /**
@@ -319,16 +326,20 @@ export class AuthService {
         this.apiService.setAuthorizationHeader(savedToken);
         this.setLoginState(true, user);
         
-        // Verificar que el token sigue siendo válido
-        this.getProfile().subscribe({
-          next: () => {
-            console.log('✅ Sesión restaurada exitosamente');
-          },
-          error: () => {
-            console.log('⚠️ Token expirado, cerrando sesión');
-            this.logout();
-          }
-        });
+        // TODO: Verificar token cuando el backend esté disponible
+        // Por ahora, mantener la sesión sin validar con el backend
+        console.log('✅ Sesión restaurada desde localStorage (sin validar token)');
+        
+        // Código comentado para validación futura:
+        // this.getProfile().subscribe({
+        //   next: () => {
+        //     console.log('✅ Sesión restaurada exitosamente');
+        //   },
+        //   error: () => {
+        //     console.log('⚠️ Token expirado, cerrando sesión');
+        //     this.logout();
+        //   }
+        // });
       } catch (error) {
         console.error('❌ Error al restaurar sesión:', error);
         this.logout();

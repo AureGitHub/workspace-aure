@@ -103,4 +103,55 @@ export class UserRepository extends BaseRepository<User> {
     const result = await this.db.queryOne<{ count: string }>(query, params);
     return parseInt(result?.count || "0") > 0;
   }
+
+  // Override create method to handle password hashing in a simpler way
+  async createUserSimple(data: CreateUserInput): Promise<User> {
+    // Simple password hash for demo (use bcrypt in production)
+    const encoder = new TextEncoder();
+    const passwordData = encoder.encode(data.password);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", passwordData);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    const { password, ...userData } = data;
+    const userDataWithDefaults = {
+      ...userData,
+      password_hash: passwordHash,
+      is_active: true,
+      email_verified: false,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    // Use base create method but build the query manually to handle all fields
+    const fields = Object.keys(userDataWithDefaults).join(", ");
+    const values = Object.values(userDataWithDefaults);
+    const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
+
+    const result = await this.db.queryOne<User>(
+      `INSERT INTO ${this.tableName} (${fields}) VALUES (${placeholders}) RETURNING *`,
+      values
+    );
+
+    if (!result) {
+      throw new Error("Failed to create user");
+    }
+
+    return result;
+  }
+
+  // Override update to handle the inherited method
+  async updateUser(id: number, data: Partial<UpdateUserInput>): Promise<User | null> {
+    const updateData = {
+      ...data,
+      updated_at: new Date()
+    };
+
+    return await this.update(id, updateData);
+  }
+
+  // Delete user method
+  async deleteUser(id: number): Promise<boolean> {
+    return await this.delete(id);
+  }
 }

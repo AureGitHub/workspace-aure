@@ -11,7 +11,9 @@ import { LoginData, RegisterData, AuthResponse, BackendLoginRequest } from '../a
 export interface AppLayoutConfig {
   showHeader?: boolean;
   showFooter?: boolean;
-  headerTitle?: string;
+  appName?: string;          // Nombre de la app (lado izquierdo)
+  pageTitle?: string;        // Título de la página (centro)
+  headerTitle?: string;      // Mantener por compatibilidad
   headerSubtitle?: string;
   footerText?: string;
   showBackButton?: boolean;
@@ -46,7 +48,16 @@ export interface AppLayoutConfig {
         </ion-buttons>
         
         <ion-title>
-          {{ config.headerTitle || 'Workspace Aure' }}
+          <div class="header-content">
+            <!-- Nombre de la app (izquierda) -->
+            <div class="app-name">
+              {{ config.appName || config.headerTitle || 'Workspace Aure' }}
+            </div>
+            <!-- Título de la página (centro) -->
+            <div class="page-title" *ngIf="config.pageTitle">
+              {{ config.pageTitle }}
+            </div>
+          </div>
           <p *ngIf="config.headerSubtitle" class="header-subtitle">
             {{ config.headerSubtitle }}
           </p>
@@ -235,6 +246,28 @@ export interface AppLayoutConfig {
       display: block;
       height: 100vh;
       position: relative;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .app-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .page-title {
+      font-size: 0.95rem;
+      font-weight: 400;
+      opacity: 0.9;
+      text-align: center;
+      flex: 1;
+      margin: 0 16px;
     }
 
     .header-subtitle {

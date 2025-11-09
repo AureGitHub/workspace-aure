@@ -21,6 +21,9 @@ import {
 // Imports de la librería compartida
 import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
 
+// Import del servicio de título
+import { PageTitleService } from '../services/page-title.service';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -42,7 +45,7 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
           <ion-grid>
             <ion-row class="ion-justify-content-center">
               <ion-col size="12" size-md="4">
-                <ion-card class="feature-card">
+                <ion-card class="feature-card" (click)="onPropertyManagementClick()">
                   <ion-card-content>
                     <ion-icon name="business-outline" color="primary" class="feature-icon"></ion-icon>
                     <h3>Gestión de Propiedades</h3>
@@ -52,7 +55,7 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
               </ion-col>
               
               <ion-col size="12" size-md="4">
-                <ion-card class="feature-card">
+                <ion-card class="feature-card" (click)="onRentalManagementClick()">
                   <ion-card-content>
                     <ion-icon name="card-outline" color="tertiary" class="feature-icon"></ion-icon>
                     <h3>Gestión de alquileres</h3>
@@ -62,7 +65,7 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
               </ion-col>
               
               <ion-col size="12" size-md="4" *ngIf="isAdmin">
-                <ion-card class="feature-card">
+                <ion-card class="feature-card" (click)="onUserManagementClick()">
                   <ion-card-content>
                     <ion-icon name="people-outline" color="secondary" class="feature-icon"></ion-icon>
                     <h3>Control de usuarios</h3>
@@ -74,6 +77,15 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
           </ion-grid>
         </div>
 
+        <!-- Debug section - TEMPORAL -->
+        <div style="padding: 20px; background: #f0f0f0; margin: 20px;">
+          <h4>Debug Autenticación</h4>
+          <ion-button color="primary" (click)="debugLogin()">Login de Prueba</ion-button>
+          <ion-button color="secondary" (click)="debugLogout()">Logout</ion-button>
+          <ion-button color="tertiary" (click)="debugCheckState()">Ver Estado</ion-button>
+          <p><strong>Estado:</strong> {{ isAuthenticated ? 'Logueado' : 'No logueado' }}</p>
+          <p><strong>Es Admin:</strong> {{ isAdmin ? 'Sí' : 'No' }}</p>
+        </div>
         
         <!-- Toast para mensajes -->
         <ion-toast 
@@ -129,22 +141,46 @@ import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
       margin: 10px 0;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      background: var(--ion-color-light-tint);
     }
 
     .feature-icon {
       font-size: 3rem;
       margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1);
+      filter: brightness(1.2);
     }
 
     .feature-card h3 {
       color: var(--ion-color-dark);
       margin: 16px 0 8px;
       font-weight: 600;
+      transition: color 0.3s ease;
     }
 
     .feature-card p {
       color: var(--ion-color-medium);
       line-height: 1.5;
+      transition: color 0.3s ease;
+    }
+
+    .feature-card:hover h3 {
+      color: var(--ion-color-primary);
+    }
+
+    .feature-card:hover p {
+      color: var(--ion-color-dark);
     }
 
     .cta-section {
@@ -249,7 +285,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private pageTitleService: PageTitleService
   ) {
     // Registrar iconos de Ionicons
     addIcons({
@@ -269,6 +306,9 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('Home page loaded');
+    
+    // Para home limpiamos el título de página (solo queda el nombre de la app)
+    this.pageTitleService.clearTitle();
     
     // Obtener estado inicial inmediatamente
     this.isAuthenticated = this.authService.isLoggedIn();
@@ -339,6 +379,80 @@ export class HomePage implements OnInit, OnDestroy {
     this.toastMessage = message;
     this.toastColor = color;
     this.showToast = true;
+  }
+
+  // Métodos para navegación de las feature cards
+  onPropertyManagementClick() {
+    // TODO: Navegar a gestión de propiedades
+    this.showToastMessage('Próximamente: Gestión de Propiedades', 'primary');
+  }
+
+  onRentalManagementClick() {
+    // TODO: Navegar a gestión de alquileres
+    this.showToastMessage('Próximamente: Gestión de Alquileres', 'tertiary');
+  }
+
+  onUserManagementClick() {
+    // Navegar a control-usuario (el guard se encargará de la seguridad)
+    this.router.navigate(['/control-usuario']);
+  }
+
+  // Métodos de debug - TEMPORAL
+  debugLogin() {
+    console.log('🧪 Simulando login de prueba...');
+    
+    // Simular datos de usuario
+    const mockUser = {
+      id: 1,
+      first_name: 'Admin',
+      last_name: 'Test',
+      email: 'admin@test.com',
+      user_type: 'admin' as const,
+      created_at: new Date().toISOString()
+    };
+
+    // Simular token
+    const mockToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJ1c2VyX3R5cGUiOiJhZG1pbiIsImV4cCI6MTczMTIzNDAwMH0.test';
+
+    // Establecer directamente en localStorage
+    localStorage.setItem('auth_isLogin', 'true');
+    localStorage.setItem('auth_token', mockToken);
+    localStorage.setItem('auth_user', JSON.stringify(mockUser));
+
+    // Llamar login en el servicio
+    this.authService.login();
+    
+    // Actualizar estado local
+    this.isAuthenticated = this.authService.isLoggedIn();
+    this.isAdmin = this.isAuthenticated ? this.authService.isAdmin() : false;
+    
+    console.log('✅ Login de prueba completado');
+    this.showToastMessage('Login de prueba realizado', 'success');
+  }
+
+  debugLogout() {
+    console.log('🧪 Haciendo logout...');
+    this.authService.logout();
+    this.isAuthenticated = this.authService.isLoggedIn();
+    this.isAdmin = this.isAuthenticated ? this.authService.isAdmin() : false;
+    console.log('✅ Logout completado');
+    this.showToastMessage('Logout realizado', 'warning');
+  }
+
+  debugCheckState() {
+    console.log('🧪 Verificando estado actual...');
+    console.log('💾 localStorage:', {
+      auth_isLogin: localStorage.getItem('auth_isLogin'),
+      auth_token: localStorage.getItem('auth_token'),
+      auth_user: localStorage.getItem('auth_user')
+    });
+    console.log('🔐 AuthService:', {
+      isAuthenticated: this.authService.isAuthenticated(),
+      currentUser: this.authService.getCurrentUser(),
+      hasToken: !!this.authService.getToken(),
+      isAdmin: this.authService.isAdmin()
+    });
+    this.showToastMessage('Ver consola para detalles del estado', 'primary');
   }
 
 }
