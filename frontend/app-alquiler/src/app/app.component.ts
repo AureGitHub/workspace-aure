@@ -9,7 +9,7 @@ import {
   AppLayoutConfig, 
   AuthService,
   LoginData,
-  RegisterData 
+  RegisterData
 } from 'shared-lib';
 
 @Component({

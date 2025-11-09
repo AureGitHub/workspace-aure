@@ -4,6 +4,7 @@ import { map, tap, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { User, BackendLoginRequest, BackendRegisterRequest, BackendAuthResponse } from './auth.interfaces';
+import { SharedLibConfigService } from '../config/shared-lib-config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -31,8 +32,11 @@ export class AuthService {
   private readonly tokenKey = 'auth_token';
   private readonly userKey = 'auth_user';
 
-  constructor(private apiService: ApiService) {
-    // Configurar el API service con la URL del backend
+  constructor(
+    private apiService: ApiService,
+    private configService: SharedLibConfigService
+  ) {
+    // Configurar el API service con la URL del backend desde la configuración
     this.configureApiService();
     // Inicializar el estado desde localStorage si existe
     this.initializeAuthState();
@@ -42,10 +46,12 @@ export class AuthService {
    * Configura el ApiService para trabajar con el backend
    */
   private configureApiService(): void {
+    const backendConfig = this.configService.getBackendConfig();
+    
     this.apiService.configure({
-      baseUrl: 'http://localhost:3001',
-      timeout: 30000,
-      retryAttempts: 2,
+      baseUrl: backendConfig.baseUrl, // Solo la baseUrl, el apiPrefix se incluye en cada endpoint
+      timeout: backendConfig.timeout || 30000,
+      retryAttempts: backendConfig.retryAttempts || 2,
       defaultHeaders: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -85,7 +91,8 @@ export class AuthService {
    * Método para hacer login con backend
    */
   loginWithCredentials(credentials: BackendLoginRequest): Observable<boolean> {
-    return this.apiService.post<BackendAuthResponse>('/auth/login', credentials).pipe(
+    const endpoint = '/app-alquiler/auth/login';
+    return this.apiService.post<BackendAuthResponse>(endpoint, credentials).pipe(
       map(response => {
         if (response.success && response.data && response.data.user && response.data.token) {
           // Guardar token
@@ -114,7 +121,8 @@ export class AuthService {
    * Método para registrar usuario
    */
   registerUser(userData: BackendRegisterRequest): Observable<boolean> {
-    return this.apiService.post<BackendAuthResponse>('/auth/register', userData).pipe(
+    const endpoint = '/app-alquiler/auth/register';
+    return this.apiService.post<BackendAuthResponse>(endpoint, userData).pipe(
       map(response => {
         if (response.success) {
           console.log('📝 Usuario registrado exitosamente');
@@ -243,7 +251,8 @@ export class AuthService {
    * Obtiene el perfil del usuario desde el backend
    */
   getProfile(): Observable<{ success: boolean; user: User }> {
-    return this.apiService.get<{ success: boolean; user: User }>('/auth/profile').pipe(
+    const endpoint = '/app-alquiler/auth/profile';
+    return this.apiService.get<{ success: boolean; user: User }>(endpoint).pipe(
       tap(response => {
         if (response.success && response.user) {
           this.currentUserSubject.next(response.user);
@@ -261,7 +270,8 @@ export class AuthService {
    * Actualiza el perfil del usuario
    */
   updateProfile(userData: Partial<User>): Observable<boolean> {
-    return this.apiService.put<BackendAuthResponse>('/auth/profile', userData).pipe(
+    const endpoint = '/app-alquiler/auth/profile';
+    return this.apiService.put<BackendAuthResponse>(endpoint, userData).pipe(
       map(response => {
         if (response.success && response.data && response.data.user) {
           this.currentUserSubject.next(response.data.user);
@@ -285,7 +295,8 @@ export class AuthService {
       new_password: newPassword
     };
 
-    return this.apiService.put<BackendAuthResponse>('/auth/change-password', data).pipe(
+    const endpoint = '/app-alquiler/auth/change-password';
+    return this.apiService.put<BackendAuthResponse>(endpoint, data).pipe(
       map(response => response.success),
       catchError(error => {
         console.error('❌ Error al cambiar contraseña:', error);

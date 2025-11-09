@@ -1,11 +1,12 @@
 import { Environment } from './environment.interface';
 
 export const environment: Environment = {
-  production: true,
+  production: false,
+  testing: true,
   backend: {
-    baseUrl: 'https://api.alquiler-zarza.com',
+    baseUrl: 'http://localhost:3999',
     apiPrefix: '/app-alquiler',
-    timeout: 30000,
-    retryAttempts: 3
+    timeout: 15000,
+    retryAttempts: 1
   }
 };

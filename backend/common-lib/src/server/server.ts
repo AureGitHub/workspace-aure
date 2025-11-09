@@ -139,10 +139,19 @@ export class CommonServer {
     this.app.use(middleware);
   }
 
-  // Add router
-  addRouter(router: Router) {
-    this.app.use(router.routes());
-    this.app.use(router.allowedMethods());
+  // Add router with optional prefix
+  addRouter(router: Router, prefix?: string) {
+    if (prefix) {
+      // Create a new router with the prefix
+      const prefixedRouter = new Router();
+      // Mount the router under the prefix
+      prefixedRouter.use(prefix, router.routes(), router.allowedMethods());
+      this.app.use(prefixedRouter.routes());
+      this.app.use(prefixedRouter.allowedMethods());
+    } else {
+      this.app.use(router.routes());
+      this.app.use(router.allowedMethods());
+    }
   }
 
   // Health check endpoint

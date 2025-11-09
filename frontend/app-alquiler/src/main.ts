@@ -5,6 +5,8 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
+import { provideSharedLibFromEnvironment } from 'shared-lib';
+import { environment } from './environments/environment';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -12,5 +14,7 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptorsFromDi()),
+    // Configurar la librería compartida desde environment
+    provideSharedLibFromEnvironment(environment),
   ],
 });

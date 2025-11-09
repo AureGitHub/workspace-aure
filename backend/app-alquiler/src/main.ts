@@ -51,14 +51,14 @@ async function main() {
       logging: true,
     });
 
-    // Add health check
-    server.addHealthCheck("/health");
+    // Add health check with app prefix
+    server.addHealthCheck("/app-alquiler/health");
 
     // Add database health check
     server.addRoutes([
       {
         method: "GET",
-        path: "/health/db",
+        path: "/app-alquiler/health/db",
         handler: async (ctx: any) => {
           if (db) {
             const isHealthy = await db.healthCheck();
@@ -81,17 +81,17 @@ async function main() {
       },
     ]);
 
-    // Add API routes (only if database is available)
+    // Add API routes with app prefix (only if database is available)
     if (authService) {
       const authRoutes = createAuthRoutes(authService);
-      server.addRouter(authRoutes);
+      server.addRouter(authRoutes, "/app-alquiler");
     }
 
     // Add API info endpoint
     server.addRoutes([
       {
         method: "GET",
-        path: "/api/info",
+        path: "/app-alquiler/api/info",
         handler: (ctx: any) => {
           ctx.response.body = {
             name: "App Alquiler Backend API",
@@ -99,14 +99,15 @@ async function main() {
             description: "Backend API para la aplicación de alquiler",
             database_status: db ? "connected" : "not available",
             endpoints: {
-              health: "/health",
-              database_health: "/health/db",
+              health: "/app-alquiler/health",
+              database_health: "/app-alquiler/health/db",
+              info: "/app-alquiler/api/info",
               auth: authService ? {
-                register: "POST /auth/register",
-                login: "POST /auth/login",
-                profile: "GET /auth/profile",
-                update_profile: "PUT /auth/profile",
-                change_password: "PUT /auth/change-password",
+                register: "POST /app-alquiler/auth/register",
+                login: "POST /app-alquiler/auth/login",
+                profile: "GET /app-alquiler/auth/profile",
+                update_profile: "PUT /app-alquiler/auth/profile",
+                change_password: "PUT /app-alquiler/auth/change-password",
               } : "Not available (database required)",
             },
             timestamp: new Date().toISOString(),

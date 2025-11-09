@@ -8,3 +8,6 @@ export * from './auth/auth.service';
 export * from './api/api.service';
 export * from './api/api.types';
 export * from './api/api.interceptor';
+export * from './config/shared-lib.config';
+export * from './config/shared-lib-config.service';
+export * from './config/shared-lib.providers';
