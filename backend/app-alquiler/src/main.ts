@@ -3,6 +3,7 @@ import { Application, Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
 import { createDatabaseService } from "@common-lib/database/mod.ts";
 import { loadConfig, Logger } from "@common-lib/utils/mod.ts";
 import { UserRepository } from "./models/user.repository.ts";
+import { ProfileRepository } from "./models/profile.repository.ts";
 
 async function main() {
   try {
@@ -14,6 +15,7 @@ async function main() {
     // Initialize database
     let db = null;
     let userRepository = null;
+    let profileRepository = null;
     
     try {
       db = createDatabaseService({
@@ -30,6 +32,7 @@ async function main() {
       Logger.info("Database connected successfully");
       
       userRepository = new UserRepository(db);
+      profileRepository = new ProfileRepository(db);
     } catch (error) {
       Logger.warn("Database connection failed:", (error as Error).message);
     }
@@ -146,22 +149,53 @@ async function main() {
       }
     });
 
+    // Profile routes
+    if (profileRepository) {
+      // GET /app-alquiler/profiles - Obtener todos los perfiles activos
+      router.get("/app-alquiler/profiles", async (ctx: any) => {
+        try {
+          console.log("📋 GET /profiles - Solicitando lista de perfiles activos...");
+          
+          const profiles = await (profileRepository as any).findAllActive();
+          
+          console.log(`✅ Devolviendo ${profiles.length} perfiles activos`);
+          
+          ctx.response.status = 200;
+          ctx.response.body = {
+            success: true,
+            data: profiles,
+            message: "Perfiles obtenidos correctamente",
+            timestamp: new Date().toISOString(),
+          };
+        } catch (error) {
+          console.error("❌ Error al obtener perfiles:", error);
+          ctx.response.status = 500;
+          ctx.response.body = {
+            success: false,
+            message: "Error interno del servidor al obtener perfiles",
+            error: error instanceof Error ? error.message : "Error desconocido",
+            timestamp: new Date().toISOString(),
+          };
+        }
+      });
+    }
+
     // User routes
     if (userRepository) {
       // GET /app-alquiler/users
       router.get("/app-alquiler/users", async (ctx: any) => {
         try {
-          console.log("📋 GET /users - Solicitando lista de usuarios desde base de datos...");
+          console.log("📋 GET /users - Solicitando lista de usuarios con perfiles desde base de datos...");
           
-          const users = await (userRepository as any).findAll();
+          const users = await (userRepository as any).findAllWithProfiles();
           
-          console.log(`✅ Devolviendo ${users.length} usuarios desde base de datos`);
+          console.log(`✅ Devolviendo ${users.length} usuarios con perfiles desde base de datos`);
           
           ctx.response.status = 200;
           ctx.response.body = {
             success: true,
             data: users,
-            message: "Usuarios obtenidos correctamente desde base de datos",
+            message: "Usuarios con perfiles obtenidos correctamente desde base de datos",
             timestamp: new Date().toISOString(),
           };
         } catch (error) {
@@ -191,9 +225,9 @@ async function main() {
             return;
           }
 
-          console.log(`👤 GET /users/${id} - Solicitando usuario con ID: ${id}`);
+          console.log(`👤 GET /users/${id} - Solicitando usuario con perfil con ID: ${id}`);
 
-          const user = await (userRepository as any).findById(id);
+          const user = await (userRepository as any).findByIdWithProfile(id);
 
           if (!user) {
             ctx.response.status = 404;
@@ -205,13 +239,13 @@ async function main() {
             return;
           }
 
-          console.log(`✅ Usuario encontrado: ${user.email}`);
+          console.log(`✅ Usuario encontrado: ${user.email} (${user.profile_description})`);
 
           ctx.response.status = 200;
           ctx.response.body = {
             success: true,
             data: user,
-            message: "Usuario obtenido correctamente desde base de datos",
+            message: "Usuario con perfil obtenido correctamente desde base de datos",
             timestamp: new Date().toISOString(),
           };
         } catch (error) {
@@ -292,13 +326,13 @@ async function main() {
           }
 
           // Validar campos obligatorios
-          const { username, first_name, last_name, email, password, user_type } = userData;
+          const { username, first_name, last_name, email, password, profile_id } = userData;
           
-          if (!username || !first_name || !last_name || !email || !password || !user_type) {
+          if (!username || !first_name || !last_name || !email || !password || !profile_id) {
             ctx.response.status = 400;
             ctx.response.body = {
               success: false,
-              message: "Todos los campos son obligatorios (username, first_name, last_name, email, password, user_type)",
+              message: "Todos los campos son obligatorios (username, first_name, last_name, email, password, profile_id)",
               timestamp: new Date().toISOString(),
             };
             return;
@@ -316,13 +350,26 @@ async function main() {
             return;
           }
 
-          // Validar tipo de usuario
-          const validUserTypes = ['admin', 'owner', 'tenant'];
-          if (!validUserTypes.includes(user_type)) {
+          // Validar profile_id
+          const profileIdNum = parseInt(profile_id);
+          if (isNaN(profileIdNum) || profileIdNum < 1) {
             ctx.response.status = 400;
             ctx.response.body = {
               success: false,
-              message: "Tipo de usuario inválido. Debe ser: admin, owner o tenant",
+              message: "profile_id debe ser un número válido",
+              timestamp: new Date().toISOString(),
+            };
+            return;
+          }
+
+          // Verificar que el profile_id existe
+          console.log(`🔍 Verificando si profile_id ${profileIdNum} existe...`);
+          const profileExists = await (profileRepository as any).findById(profileIdNum);
+          if (!profileExists) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+              success: false,
+              message: "El profile_id especificado no existe",
               timestamp: new Date().toISOString(),
             };
             return;
@@ -362,7 +409,7 @@ async function main() {
             last_name: last_name.trim(),
             email: email.trim().toLowerCase(),
             password: password, // Se hará hash automáticamente en createUserSimple
-            user_type: user_type
+            profile_id: profileIdNum
           });
 
           if (!newUser) {
@@ -645,7 +692,36 @@ async function main() {
             return;
           }
 
-          // Exactamente igual que el GET que funciona
+          // Validar profile_id si viene en los datos de actualización
+          if (updateData.profile_id !== undefined) {
+            const profileIdNum = parseInt(updateData.profile_id);
+            if (isNaN(profileIdNum) || profileIdNum < 1) {
+              ctx.response.status = 400;
+              ctx.response.body = {
+                success: false,
+                message: "profile_id debe ser un número válido",
+                timestamp: new Date().toISOString(),
+              };
+              return;
+            }
+
+            // Verificar que el profile_id existe
+            const profileExists = await (profileRepository as any).findById(profileIdNum);
+            if (!profileExists) {
+              ctx.response.status = 400;
+              ctx.response.body = {
+                success: false,
+                message: "El profile_id especificado no existe",
+                timestamp: new Date().toISOString(),
+              };
+              return;
+            }
+            
+            // Actualizar el valor para asegurar que sea un número
+            updateData.profile_id = profileIdNum;
+          }
+
+          // Buscar usuario existente
           const user = await (userRepository as any).findById(id);
           console.log(`🚀 Usuario encontrado:`, !!user);
 

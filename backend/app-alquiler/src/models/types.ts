@@ -22,6 +22,15 @@ export interface Property {
   updated_at: Date;
 }
 
+// Profile Model - Represents user profiles/roles
+export interface Profile {
+  id: number;
+  description: string;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
 // User Model - Represents users (owners and tenants)
 export interface User {
   id: number;
@@ -31,7 +40,8 @@ export interface User {
   first_name: string;
   last_name: string;
   phone?: string;
-  user_type: "owner" | "tenant" | "admin";
+  profile_id: number;
+  profile?: Profile; // Relación opcional para joins
   is_active: boolean;
   email_verified: boolean;
   created_at: Date;
@@ -117,6 +127,15 @@ export interface UpdatePropertyInput extends Partial<CreatePropertyInput> {
   availability_status?: Property["availability_status"];
 }
 
+// Create Profile Input
+export interface CreateProfileInput {
+  description: string;
+  is_active?: boolean;
+}
+
+// Update Profile Input
+export interface UpdateProfileInput extends Partial<CreateProfileInput> {}
+
 // Create User Input
 export interface CreateUserInput {
   username: string;
@@ -125,7 +144,7 @@ export interface CreateUserInput {
   first_name: string;
   last_name: string;
   phone?: string;
-  user_type: User["user_type"];
+  profile_id: number;
 }
 
 // Update User Input

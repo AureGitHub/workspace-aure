@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { 
@@ -11,7 +11,9 @@ import {
   arrowBackOutline,
   personOutline,
   refreshOutline,
-  alertCircleOutline
+  alertCircleOutline,
+  closeOutline,
+  saveOutline
 } from 'ionicons/icons';
 
 // Imports de la librería compartida
@@ -26,12 +28,17 @@ import {
 // Import del servicio de título
 import { PageTitleService } from '../services/page-title.service';
 
+// Import del modal de formulario
+import { UserFormModalComponent } from './user-form-modal.component';
+
 interface User {
   id: number;
   first_name: string;
   last_name: string;
   email: string;
-  user_type: 'admin' | 'owner' | 'tenant';
+  user_type?: 'admin' | 'owner' | 'tenant'; // Para compatibilidad hacia atrás
+  profile_id: number;
+  profile_description?: string; // Información del perfil desde el JOIN
   created_at: string;
   updated_at?: string;
 }
@@ -193,6 +200,7 @@ interface User {
 })
 export class ControlUsuarioPage implements OnInit {
   users: User[] = [];
+  profiles: any[] = []; // Lista de perfiles disponibles
   loading = false;
   error: string | null = null;
   lastUpdate: Date = new Date();
@@ -236,8 +244,8 @@ export class ControlUsuarioPage implements OnInit {
       filterable: true
     },
     {
-      field: 'user_type',
-      header: 'Tipo de Usuario',
+      field: 'profile_description',
+      header: 'Perfil',
       sortable: true,
       filterable: true,
       type: 'tag'
@@ -257,7 +265,7 @@ export class ControlUsuarioPage implements OnInit {
     rowsPerPageOptions: [5, 10, 25, 50],
     selectionMode: 'multiple',
     showCurrentPageReport: true,
-    globalFilterFields: ['first_name', 'last_name', 'email', 'user_type']
+    globalFilterFields: ['first_name', 'last_name', 'email', 'profile_description']
   };
 
   constructor(
@@ -265,6 +273,7 @@ export class ControlUsuarioPage implements OnInit {
     private authService: AuthService,
     private apiService: ApiService,
     private alertController: AlertController,
+    private modalController: ModalController,
     private cdr: ChangeDetectorRef,
     private pageTitleService: PageTitleService
   ) {
@@ -277,7 +286,9 @@ export class ControlUsuarioPage implements OnInit {
       'arrow-back-outline': arrowBackOutline,
       'person-outline': personOutline,
       'refresh-outline': refreshOutline,
-      'alert-circle-outline': alertCircleOutline
+      'alert-circle-outline': alertCircleOutline,
+      'close': closeOutline,
+      'save': saveOutline
     });
   }
 
@@ -299,7 +310,8 @@ export class ControlUsuarioPage implements OnInit {
     
     console.log('👨‍💼 Usuario admin accediendo a Control de Usuarios');
     
-    // Cargar usuarios
+    // Cargar perfiles y usuarios
+    this.loadProfiles();
     this.loadUsers();
   }
 
@@ -338,6 +350,30 @@ export class ControlUsuarioPage implements OnInit {
       });
   }
 
+  loadProfiles() {
+    console.log('🔄 loadProfiles() iniciado...');
+    
+    // Usar el ApiService para obtener los perfiles
+    this.apiService.get<{success: boolean, data: any[]}>('/app-alquiler/profiles')
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Respuesta del servidor (loadProfiles):', response);
+          if (response.success && response.data) {
+            console.log('📊 Perfiles obtenidos:', response.data.length, 'perfiles');
+            this.profiles = response.data;
+          } else {
+            console.log('⚠️ Respuesta sin datos válidos de perfiles');
+            this.profiles = [];
+          }
+        },
+        error: (error) => {
+          console.error('❌ Error al cargar perfiles:', error);
+          this.profiles = [];
+          this.showToastMessage('Error al cargar perfiles', 'danger');
+        }
+      });
+  }
+
   refreshUsers() {
     this.showToastMessage('Actualizando usuarios...', 'primary');
     this.loadUsers();
@@ -346,214 +382,44 @@ export class ControlUsuarioPage implements OnInit {
   async onAddUser() {
     console.log('➕ Añadiendo nuevo usuario...');
     
-    // Usar AlertController para crear nuevo usuario
-    const alert = await this.alertController.create({
-      header: 'Nuevo Usuario',
-      message: 'Ingresa los datos del nuevo usuario',
-      inputs: [
-        {
-          name: 'username',
-          type: 'text',
-          placeholder: 'Nombre de usuario',
-          value: `testuser${Date.now()}`, // Username único para cada prueba
-          attributes: {
-            maxlength: 50,
-            required: true
-          }
-        },
-        {
-          name: 'first_name',
-          type: 'text',
-          placeholder: 'Nombre',
-          value: 'Test Usuario', // Datos de prueba
-          attributes: {
-            maxlength: 50,
-            required: true
-          }
-        },
-        {
-          name: 'last_name',
-          type: 'text',
-          placeholder: 'Apellidos',
-          value: 'De Prueba', // Datos de prueba
-          attributes: {
-            maxlength: 50,
-            required: true
-          }
-        },
-        {
-          name: 'email',
-          type: 'email',
-          placeholder: 'Email',
-          value: `test${Date.now()}@example.com`, // Email único para cada prueba
-          attributes: {
-            maxlength: 100,
-            required: true
-          }
-        },
-        {
-          name: 'password',
-          type: 'password',
-          placeholder: 'Contraseña',
-          value: 'test123456', // Contraseña de prueba
-          attributes: {
-            minlength: 6,
-            required: true
-          }
-        },
-        {
-          name: 'user_type',
-          type: 'text',
-          placeholder: 'Tipo de usuario (admin, owner, tenant)',
-          value: 'tenant', // Valor por defecto
-          attributes: {
-            required: true
-          }
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          cssClass: 'secondary'
-        },
-        {
-          text: 'Crear Usuario',
-          cssClass: 'primary',
-          handler: (data) => {
-            console.log('📝 Datos recibidos para nuevo usuario:', data);
-            
-            // Validar campos obligatorios
-            const username = data.username?.trim();
-            const firstName = data.first_name?.trim();
-            const lastName = data.last_name?.trim();
-            const email = data.email?.trim();
-            const password = data.password?.trim();
-            const userType = data.user_type?.trim();
-            
-            if (!username || !firstName || !lastName || !email || !password || !userType) {
-              this.showToastMessage('Todos los campos son obligatorios', 'danger');
-              return false;
-            }
-
-            // Validar formato de email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-              this.showToastMessage('Formato de email inválido', 'danger');
-              return false;
-            }
-
-            // Validar contraseña
-            if (password.length < 6) {
-              this.showToastMessage('La contraseña debe tener al menos 6 caracteres', 'danger');
-              return false;
-            }
-
-            // Validar tipo de usuario
-            const validUserTypes = ['admin', 'owner', 'tenant'];
-            if (!validUserTypes.includes(userType.toLowerCase())) {
-              this.showToastMessage('Tipo de usuario inválido (admin, owner, tenant)', 'danger');
-              return false;
-            }
-
-            // Crear usuario
-            this.createUser({
-              username: username,
-              first_name: firstName,
-              last_name: lastName,
-              email: email,
-              password: password,
-              user_type: userType.toLowerCase() as 'admin' | 'owner' | 'tenant'
-            });
-            
-            return true;
-          }
-        }
-      ]
+    const modal = await this.modalController.create({
+      component: UserFormModalComponent,
+      componentProps: {
+        isEdit: false,
+        profiles: this.profiles
+      }
     });
 
-    await alert.present();
+    await modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    
+    if (role === 'confirm' && data) {
+      console.log('📝 Datos recibidos del modal:', data);
+      this.createUser(data);
+    }
   }
 
   async onEditUser(user: User) {
     console.log('✏️ Editando usuario:', user);
     
-    // Usar AlertController para editar todos los campos en un solo alert
-    const alert = await this.alertController.create({
-      header: 'Editar Usuario',
-      message: `Editando: ${user.first_name} ${user.last_name}`,
-      inputs: [
-        {
-          name: 'first_name',
-          type: 'text',
-          placeholder: 'Nombre',
-          value: user.first_name,
-          attributes: {
-            maxlength: 50
-          }
-        },
-        {
-          name: 'last_name',
-          type: 'text',
-          placeholder: 'Apellidos',
-          value: user.last_name,
-          attributes: {
-            maxlength: 50
-          }
-        },
-        {
-          name: 'email',
-          type: 'email',
-          placeholder: 'Email',
-          value: user.email,
-          attributes: {
-            maxlength: 100
-          }
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          cssClass: 'secondary'
-        },
-        {
-          text: 'Guardar',
-          cssClass: 'primary',
-          handler: (data) => {
-            console.log('📝 Datos recibidos del alert:', data);
-            
-            // Validar que los campos no estén vacíos
-            const firstName = data.first_name?.trim();
-            const lastName = data.last_name?.trim();
-            const email = data.email?.trim();
-            
-            if (!firstName || !lastName || !email) {
-              this.showToastMessage('Todos los campos son obligatorios', 'danger');
-              return false; // Evita que se cierre el alert
-            }
-
-            // Validar formato de email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-              this.showToastMessage('Formato de email inválido', 'danger');
-              return false;
-            }
-
-            // Actualizar usuario
-            this.updateUser(user.id, {
-              first_name: firstName,
-              last_name: lastName,
-              email: email
-            });
-            
-            return true; // Permite cerrar el alert
-          }
-        }
-      ]
+    const modal = await this.modalController.create({
+      component: UserFormModalComponent,
+      componentProps: {
+        isEdit: true,
+        user: user,
+        profiles: this.profiles
+      }
     });
 
-    await alert.present();
+    await modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    
+    if (role === 'confirm' && data) {
+      console.log('📝 Datos recibidos del modal:', data);
+      this.updateUser(user.id, data);
+    }
   }
 
   onDeleteUser(user: User) {
@@ -657,7 +523,7 @@ export class ControlUsuarioPage implements OnInit {
     last_name: string;
     email: string;
     password: string;
-    user_type: 'admin' | 'owner' | 'tenant';
+    profile_id: number;
   }) {
     console.log('🔄 Creando usuario en backend:', userData);
     console.log('🌐 Enviando petición POST a backend...');

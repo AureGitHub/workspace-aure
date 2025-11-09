@@ -23,13 +23,36 @@ export class UserRepository extends BaseRepository<User> {
     );
   }
 
-  // Find users by type
-  async findByType(userType: User["user_type"]): Promise<User[]> {
+  // Find users by profile
+  async findByProfile(profileId: number): Promise<User[]> {
     const result = await this.db.query<User>(
-      `SELECT * FROM ${this.tableName} WHERE user_type = $1 ORDER BY created_at DESC`,
-      [userType]
+      `SELECT * FROM ${this.tableName} WHERE profile_id = $1 ORDER BY created_at DESC`,
+      [profileId]
     );
     return result.rows;
+  }
+
+  // Find users with profile information (JOIN)
+  async findAllWithProfiles(): Promise<(User & { profile_description: string })[]> {
+    const result = await this.db.query<User & { profile_description: string }>(
+      `SELECT u.*, p.description as profile_description 
+       FROM ${this.tableName} u
+       JOIN "app-alquiler".profiles p ON u.profile_id = p.id
+       ORDER BY u.created_at DESC`,
+      []
+    );
+    return result.rows;
+  }
+
+  // Find user by ID with profile information
+  async findByIdWithProfile(id: number): Promise<(User & { profile_description: string }) | null> {
+    return await this.db.queryOne<User & { profile_description: string }>(
+      `SELECT u.*, p.description as profile_description 
+       FROM ${this.tableName} u
+       JOIN "app-alquiler".profiles p ON u.profile_id = p.id
+       WHERE u.id = $1`,
+      [id]
+    );
   }
 
   // Create user with hashed password
