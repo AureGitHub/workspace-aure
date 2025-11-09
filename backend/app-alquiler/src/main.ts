@@ -838,12 +838,10 @@ async function main() {
     app.use(router.allowedMethods());
 
     // Start server
-    const port = parseInt(Deno.env.get("PORT") || "3001");
-    const hostname = Deno.env.get("HOST") || "localhost";
-    
-    console.log(`🚀 Server starting on http://${hostname}:${port}`);
-    Logger.info(`Server will start on http://${hostname}:${port}`);
-    
+  let port = parseInt(Deno.env.get("PORT")?.trim() || "3001");
+  let hostname = (Deno.env.get("HOST") || "localhost").trim();
+
+
     await app.listen({ port, hostname });
 
   } catch (error) {

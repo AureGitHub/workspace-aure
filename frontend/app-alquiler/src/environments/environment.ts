@@ -7,10 +7,15 @@ import { Environment } from './environment.interface';
 export const environment: Environment = {
   production: false,
   backend: {
-    baseUrl: 'http://localhost:3001',
+    baseUrl: 'http://192.168.1.24:3001',
     apiPrefix: '/app-alquiler',
     timeout: 30000,
     retryAttempts: 2
+  },
+  auth: {
+    enableDebugCredentials: true,
+    debugEmail: 'admin@test.com',
+    debugPassword: 'admin123'
   }
 };
 

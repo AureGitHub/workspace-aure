@@ -183,6 +183,10 @@ export class CommonServer {
   // Start server
   async start(): Promise<void> {
     const { port, hostname } = this.config;
+
+
+
+
     
     if (this.config.logging) {
       console.log(`Server starting on http://${hostname}:${port}`);

@@ -7,5 +7,8 @@ export const environment: Environment = {
     apiPrefix: '/app-alquiler',
     timeout: 30000,
     retryAttempts: 3
+  },
+  auth: {
+    enableDebugCredentials: false
   }
 };

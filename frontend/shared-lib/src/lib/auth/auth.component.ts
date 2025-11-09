@@ -27,6 +27,13 @@ import {
   ValidationError 
 } from './auth.interfaces';
 
+// Interface para configuración de desarrollo
+export interface DevConfig {
+  enabled: boolean;
+  email?: string;
+  password?: string;
+}
+
 @Component({
   selector: 'lib-auth',
   standalone: true,
@@ -587,6 +594,30 @@ import {
   `]
 })
 export class AuthComponent implements OnInit, OnDestroy {
+  // Validator for matching password and confirmPassword fields
+  private passwordMatchValidator(group: FormGroup) {
+    const password = group.get('password');
+    const confirmPassword = group.get('confirmPassword');
+    if (!password || !confirmPassword) return null;
+    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+  }
+
+  // Validator for strong password (if required)
+  private strongPasswordValidator(control: any) {
+    const value = control.value || '';
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumeric = /[0-9]/.test(value);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+    return hasUpperCase && hasLowerCase && hasNumeric && hasSpecial ? null : { strongPassword: true };
+  }
+
+  // Field validation helpers
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.loginForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
+  }
+
   @Input() config: AuthConfig = {
     showLogo: false,
     title: 'Bienvenido',
@@ -646,9 +677,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   private initializeForms() {
     // Login Form - Precargar credenciales de desarrollo
-    const isDevelopment = !window.location.href.includes('prod') && 
-                         (window.location.href.includes('localhost') || 
-                          window.location.href.includes('127.0.0.1'));
+    const isDevelopment = this.isDevelopmentMode();
     
     const defaultEmail = isDevelopment ? 'admin@test.com' : '';
     const defaultPassword = isDevelopment ? 'admin123' : '';
@@ -682,35 +711,8 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.forgotPasswordForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]]
     });
-  }
 
-  // Validadores personalizados
-  private strongPasswordValidator(control: any) {
-    const value = control.value;
-    if (!value) return null;
-    
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumeric = /[0-9]/.test(value);
-    const hasSpecial = /[!@#$%^&*(),.?\":{}|<>]/.test(value);
-    
-    const valid = hasUpperCase && hasLowerCase && hasNumeric && hasSpecial;
-    return valid ? null : { strongPassword: true };
-  }
-
-  private passwordMatchValidator(group: FormGroup) {
-    const password = group.get('password');
-    const confirmPassword = group.get('confirmPassword');
-    
-    if (!password || !confirmPassword) return null;
-    
-    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
-  }
-
-  // Métodos de validación
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.loginForm.get(fieldName);
-    return !!(field && field.invalid && field.touched);
+    // Register Form already correctly initialized above
   }
 
   isRegisterFieldInvalid(fieldName: string): boolean {
@@ -882,8 +884,15 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   // Método para detectar modo desarrollo
   isDevelopmentMode(): boolean {
-    return !window.location.href.includes('prod') && 
-           (window.location.href.includes('localhost') || 
-            window.location.href.includes('127.0.0.1'));
+    const url = window.location.href;
+    return !url.includes('prod') && 
+           (url.includes('localhost') || 
+            url.includes('127.0.0.1') ||
+            url.includes('192.168.') ||
+            url.includes('10.') ||
+            url.includes('172.16.') ||
+            url.includes(':8100') || // Puerto de desarrollo Ionic
+            url.includes(':3000') || // Puerto común de desarrollo
+            url.includes(':4200'));  // Puerto de Angular CLI
   }
 }
