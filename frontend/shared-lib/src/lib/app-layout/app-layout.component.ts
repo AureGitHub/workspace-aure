@@ -31,9 +31,9 @@ export interface AppLayoutConfig {
     AuthComponent
   ],
   template: `
-    <!-- Header -->
+    <!-- Header -->     
     <ion-header *ngIf="config.showHeader" [translucent]="false">
-      <ion-toolbar [color]="config.color || 'primary'">
+  <ion-toolbar [color]="config.color" [style.background]="config.color">
         <ion-buttons slot="start">
           <ion-menu-button 
             *ngIf="config.showMenuButton"
@@ -84,7 +84,7 @@ export interface AppLayoutConfig {
     <!-- Main Content -->
     <ion-content [fullscreen]="false" [class.has-footer]="config.showFooter">
       <ion-header collapse="condense" *ngIf="config.showHeader">
-        <ion-toolbar [color]="config.color || 'primary'">
+        <ion-toolbar [color]="isHtmlColor(config.color) ? null : (config.color || 'primary')" [style.background]="isHtmlColor(config.color) ? config.color : null">
           <ion-title size="large">{{ config.headerTitle }}</ion-title>
         </ion-toolbar>
       </ion-header>
@@ -483,6 +483,14 @@ export interface AppLayoutConfig {
   `]
 })
 export class AppLayoutComponent implements OnInit, OnDestroy {
+  // Permite usar colores HTML personalizados en el header
+  isHtmlColor(color: string | undefined): boolean {
+    if (!color) return false;
+    // Check for hex, rgb, rgba, hsl, hsla
+    return /^#([A-Fa-f0-9]{3,8})$/.test(color)
+        || /^rgb(a)?\(/.test(color)
+        || /^hsl(a)?\(/.test(color);
+  }
   @ViewChild('authComponent') authComponent?: AuthComponent;
 
   @Input() config: AppLayoutConfig = {
