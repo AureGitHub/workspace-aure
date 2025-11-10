@@ -44,7 +44,7 @@ if not "!IP_CLEAN!" == "!IP_CLEAN: =!" goto clean_spaces
 set IP_CLEAN=!IP_CLEAN::=!
 endlocal & set LOCAL_IP=%IP_CLEAN%
 
-set LOCAL_IP=192.168.1.24
+@REM set LOCAL_IP=192.168.1.24
 echo [INFO] IP forzada manualmente: %LOCAL_IP%
 echo [INFO] Iniciando entorno de desarrollo completo...
 echo [INFO] Este script abrira 3 ventanas:

@@ -77,15 +77,7 @@ import { PageTitleService } from '../services/page-title.service';
           </ion-grid>
         </div>
 
-        <!-- Debug section - TEMPORAL -->
-        <div style="padding: 20px; background: #f0f0f0; margin: 20px;">
-          <h4>Debug Autenticación</h4>
-          <ion-button color="primary" (click)="debugLogin()">Login de Prueba</ion-button>
-          <ion-button color="secondary" (click)="debugLogout()">Logout</ion-button>
-          <ion-button color="tertiary" (click)="debugCheckState()">Ver Estado</ion-button>
-          <p><strong>Estado:</strong> {{ isAuthenticated ? 'Logueado' : 'No logueado' }}</p>
-          <p><strong>Es Admin:</strong> {{ isAdmin ? 'Sí' : 'No' }}</p>
-        </div>
+ 
         
         <!-- Toast para mensajes -->
         <ion-toast 
@@ -304,6 +296,8 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
+  // ...existing code...
+
   ngOnInit() {
     console.log('Home page loaded');
     
@@ -383,8 +377,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   // Métodos para navegación de las feature cards
   onPropertyManagementClick() {
-    // TODO: Navegar a gestión de propiedades
-    this.showToastMessage('Próximamente: Gestión de Propiedades', 'primary');
+    this.router.navigate(["/gestion-propiedades"]);
   }
 
   onRentalManagementClick() {

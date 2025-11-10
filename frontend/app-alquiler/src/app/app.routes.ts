@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./no-permitido/no-permitido.page').then((m) => m.NoPermitidoPage),
   },
   {
+    path: 'gestion-propiedades',
+    loadComponent: () => import('./gestion-propiedades/gestion-propiedades.page').then((m) => m.GestionPropiedadesPage),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

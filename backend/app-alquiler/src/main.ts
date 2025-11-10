@@ -4,6 +4,7 @@ import { createDatabaseService } from "@common-lib/database/mod.ts";
 import { loadConfig, Logger } from "@common-lib/utils/mod.ts";
 import { UserRepository } from "./models/user.repository.ts";
 import { ProfileRepository } from "./models/profile.repository.ts";
+import { CatastroRepository } from "./models/catastro.repository.ts";
 
 async function main() {
   try {
@@ -16,6 +17,8 @@ async function main() {
     let db = null;
     let userRepository = null;
     let profileRepository = null;
+    let catastroRepository = null;
+
     
     try {
       db = createDatabaseService({
@@ -33,6 +36,7 @@ async function main() {
       
       userRepository = new UserRepository(db);
       profileRepository = new ProfileRepository(db);
+      catastroRepository = new CatastroRepository(db);
     } catch (error) {
       Logger.warn("Database connection failed:", (error as Error).message);
     }
@@ -178,6 +182,48 @@ async function main() {
           };
         }
       });
+    }
+
+        // catastro routes
+    if (userRepository) {
+ // GET /app-alquiler/users
+      router.get("/app-alquiler/catastro", async (ctx: any) => {
+        try {
+          console.log("📋 GET /catastro - Solicitando lista de catastro desde base de datos...");
+          
+          const catastro = await (catastroRepository as any).findAll();
+          
+          console.log(`✅ Devolviendo ${catastro.length} catastro  desde base de datos`);
+          
+          ctx.response.status = 200;
+          ctx.response.body = {
+            success: true,
+            data: catastro,
+            message: "Catastro obtenido correctamente desde base de datos",
+            timestamp: new Date().toISOString(),
+          };
+        } catch (error) {
+          console.error("❌ Error al obtener usuarios:", error);
+          ctx.response.status = 500;
+          ctx.response.body = {
+            success: false,
+            message: "Error interno del servidor al obtener usuarios",
+            error: error instanceof Error ? error.message : "Error desconocido",
+            timestamp: new Date().toISOString(),
+          };
+        }
+      });
+    }
+    else{
+        router.get("/app-alquiler/catastros", (ctx: any) => {
+        ctx.response.status = 503;
+        ctx.response.body = {
+          success: false,
+          message: "Base de datos no disponible",
+          timestamp: new Date().toISOString(),
+        };
+      });
+    
     }
 
     // User routes

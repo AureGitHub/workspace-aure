@@ -17,6 +17,9 @@ const client = new Client({
 });
 
 try {
+  // Borrar tabla properties si existe antes de cualquier otra operación
+  console.log("🗑️ Borrando tabla de propiedades si existe...");
+  await client.queryObject(`DROP TABLE IF EXISTS "app-alquiler".properties CASCADE`);
   await client.connect();
   console.log("✅ Conectado exitosamente a la base de datos");
 
@@ -63,39 +66,10 @@ try {
   
   await client.queryObject(insertUsersQuery);
 
-  // Crear tabla properties
-  console.log("🏠 Creando tabla de propiedades...");
-  await client.queryObject(`
-    CREATE TABLE IF NOT EXISTS "app-alquiler".properties (
-      id SERIAL PRIMARY KEY,
-      title VARCHAR(200) NOT NULL,
-      description TEXT,
-      address VARCHAR(255) NOT NULL,
-      city VARCHAR(100) NOT NULL,
-      state VARCHAR(100) NOT NULL,
-      postal_code VARCHAR(20) NOT NULL,
-      country VARCHAR(100) NOT NULL,
-      property_type VARCHAR(20) NOT NULL CHECK (property_type IN ('apartment', 'house', 'room', 'studio', 'other')),
-      bedrooms INTEGER NOT NULL,
-      bathrooms INTEGER NOT NULL,
-      area_sqm DECIMAL(10,2) NOT NULL,
-      monthly_rent DECIMAL(10,2) NOT NULL,
-      currency VARCHAR(10) DEFAULT 'EUR',
-      availability_status VARCHAR(20) DEFAULT 'available' CHECK (availability_status IN ('available', 'rented', 'maintenance', 'inactive')),
-      images TEXT[],
-      amenities TEXT[],
-      owner_id INTEGER REFERENCES "app-alquiler".users(id) ON DELETE CASCADE,
-      created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
-    )
-  `);
 
-  // Crear índices para properties
-  console.log("🔍 Creando índices para propiedades...");
-  await client.queryObject(`CREATE INDEX IF NOT EXISTS idx_properties_city ON "app-alquiler".properties(city)`);
-  await client.queryObject(`CREATE INDEX IF NOT EXISTS idx_properties_property_type ON "app-alquiler".properties(property_type)`);
-  await client.queryObject(`CREATE INDEX IF NOT EXISTS idx_properties_availability ON "app-alquiler".properties(availability_status)`);
-  await client.queryObject(`CREATE INDEX IF NOT EXISTS idx_properties_owner ON "app-alquiler".properties(owner_id)`);
+  // Borrar tabla properties si existe
+  console.log("🗑️ Borrando tabla de propiedades si existe...");
+  await client.queryObject(`DROP TABLE IF EXISTS "app-alquiler".properties CASCADE`);
 
   // Verificar resultados
   const usersResult = await client.queryObject(`SELECT count(*) as usuarios_creados FROM "app-alquiler".users`);
