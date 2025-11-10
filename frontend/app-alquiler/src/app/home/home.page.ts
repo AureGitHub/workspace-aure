@@ -45,7 +45,7 @@ import { PageTitleService } from '../services/page-title.service';
           <ion-grid>
             <ion-row class="ion-justify-content-center">
               <ion-col size="12" size-md="4">
-                <ion-card class="feature-card" (click)="onPropertyManagementClick()">
+                <ion-card class="feature-card property-card" (click)="onPropertyManagementClick()">
                   <ion-card-content>
                     <ion-icon name="business-outline" color="primary" class="feature-icon"></ion-icon>
                     <h3>Gestión de Propiedades</h3>
@@ -55,7 +55,7 @@ import { PageTitleService } from '../services/page-title.service';
               </ion-col>
               
               <ion-col size="12" size-md="4">
-                <ion-card class="feature-card" (click)="onRentalManagementClick()">
+                <ion-card class="feature-card rental-card" (click)="onRentalManagementClick()">
                   <ion-card-content>
                     <ion-icon name="card-outline" color="tertiary" class="feature-icon"></ion-icon>
                     <h3>Gestión de alquileres</h3>
@@ -65,7 +65,7 @@ import { PageTitleService } from '../services/page-title.service';
               </ion-col>
               
               <ion-col size="12" size-md="4" *ngIf="isAdmin">
-                <ion-card class="feature-card" (click)="onUserManagementClick()">
+                <ion-card class="feature-card admin-card" (click)="onUserManagementClick()">
                   <ion-card-content>
                     <ion-icon name="people-outline" color="secondary" class="feature-icon"></ion-icon>
                     <h3>Control de usuarios</h3>
@@ -96,45 +96,56 @@ import { PageTitleService } from '../services/page-title.service';
     }
 
     .hero-section {
-      padding: 40px 20px;
+      padding: 12px 8px;
       text-align: center;
-      color: white;
-      background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+      background: white;
       border-radius: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 0px; /* Reduce space below hero-section */
+      min-height: 60px;
     }
 
     .hero-content h1 {
-      font-size: 2.5rem;
+      font-size: 1.7rem;
       font-weight: bold;
-      margin: 20px 0;
+      margin: 12px 0;
+      color: #1976d2;
     }
 
     .hero-content p {
-      font-size: 1.2rem;
+      font-size: 1rem;
       opacity: 0.9;
       max-width: 600px;
       margin: 0 auto;
-      line-height: 1.6;
+      line-height: 1.4;
+      color: #1976d2;
     }
 
     .hero-icon {
-      font-size: 4rem;
-      color: white;
+      font-size: 2.5rem;
+      color: #1976d2;
     }
 
     .features-section {
-      padding: 40px 20px;
+      padding: 10px 20px 30px 20px; /* Reduce top and bottom padding for compactness */
       background: white;
     }
 
     .feature-card {
       text-align: center;
-      margin: 10px 0;
+      margin: 8px 0;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       cursor: pointer;
       transition: all 0.3s ease;
+      min-height: 150px;
+      height: 150px; /* Force all cards to same height */
+      width: 100%; /* Ensure all cards take full column width */
+      max-width: 320px; /* Consistent max width for all cards */
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .feature-card:hover {
@@ -143,9 +154,19 @@ import { PageTitleService } from '../services/page-title.service';
       background: var(--ion-color-light-tint);
     }
 
+    .admin-card {
+      background: #ffeaea !important; /* Light red background for admin card */
+    }
+    .rental-card {
+      background: #eaffea !important; /* Light green background for rental card */
+    }
+    .property-card {
+      background: #eaf4ff !important; /* Light blue background for property card */
+    }
+
     .feature-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
+      font-size: 2rem;
+      margin-bottom: 8px;
       transition: all 0.3s ease;
     }
 
@@ -156,14 +177,16 @@ import { PageTitleService } from '../services/page-title.service';
 
     .feature-card h3 {
       color: var(--ion-color-dark);
-      margin: 16px 0 8px;
+      margin: 8px 0 4px;
       font-weight: 600;
+      font-size: 1rem;
       transition: color 0.3s ease;
     }
 
     .feature-card p {
       color: var(--ion-color-medium);
-      line-height: 1.5;
+      line-height: 1.3;
+      font-size: 0.9rem;
       transition: color 0.3s ease;
     }
 
@@ -295,8 +318,6 @@ export class HomePage implements OnInit, OnDestroy {
       'card-outline': cardOutline
     });
   }
-
-  // ...existing code...
 
   ngOnInit() {
     console.log('Home page loaded');

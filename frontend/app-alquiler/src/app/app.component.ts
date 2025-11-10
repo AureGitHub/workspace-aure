@@ -33,7 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
     showBackButton: false,
     showMenuButton: false,
     showUserProfile: true,
-    color: 'primary'
+    color: '#F7F0B0'
   };
 
   private routerSubscription?: Subscription;
