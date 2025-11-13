@@ -95,6 +95,7 @@ export class AuthService {
    * Método para hacer login con backend
    */
   loginWithCredentials(credentials: BackendLoginRequest): Observable<boolean> {
+    console.log('loginWithCredentials');
     const endpoint = '/app-alquiler/auth/login';
     return this.apiService.post<BackendAuthResponse>(endpoint, credentials).pipe(
       map(response => {

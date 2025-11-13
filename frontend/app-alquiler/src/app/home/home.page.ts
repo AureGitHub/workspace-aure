@@ -402,8 +402,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   onRentalManagementClick() {
-    // TODO: Navegar a gestión de alquileres
-    this.showToastMessage('Próximamente: Gestión de Alquileres', 'tertiary');
+  this.router.navigate(["/ver-gestion-alquiler"]);
   }
 
   onUserManagementClick() {

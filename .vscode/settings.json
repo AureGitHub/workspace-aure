@@ -28,5 +28,7 @@
   "scm.defaultViewMode": "list",
   "scm.repositories.visible": 1,
   "files.autoSave": "afterDelay",
-  "workbench.editor.restoreViewState": false
+  "workbench.editor.restoreViewState": false,
+  "copilot.inlineChat.diff": "none",
+  "editor.inlineSuggest.enabled": false
 }

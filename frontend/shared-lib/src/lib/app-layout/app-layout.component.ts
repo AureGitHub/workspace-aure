@@ -627,7 +627,7 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
           console.log('✅ Login exitoso, usuario actual:', this.currentUser);
           
           // Emitir el evento y cerrar modal
-          this.authLogin.emit(loginData);
+          this.authLogin.emit(this.currentUser);
           // Cerrar modal después de un breve delay
           setTimeout(() => {
             this.closeAuthModal();

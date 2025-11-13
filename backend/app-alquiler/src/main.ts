@@ -3,9 +3,16 @@ import { Application, Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
 import { createDatabaseService } from "@common-lib/database/mod.ts";
 import { loadConfig, Logger } from "@common-lib/utils/mod.ts";
 import { UserRepository } from "./models/user.repository.ts";
-import { ProfileRepository } from "./models/profile.repository.ts";
+
 import { CatastroRepository } from "./models/catastro.repository.ts";
 import { createUserRoutes } from "./routes/user.routes.ts";
+import { ArriendoRepository } from "./models/arriendo.repository.ts";
+import { createArriendoRoutes } from "./routes/arriendo.routes.ts";
+import { AuthenticationService } from "./services/auth.service.ts";
+import { createAuthRoutes } from "./routes/auth.routes.ts";
+import { createCatastroRoutes } from "./routes/catastro.routes.ts";
+import { createProfileRoutes } from "./routes/profile.routes.ts";
+import { ListasRepository } from "./models/listas.repository.ts";
 
 async function main() {
   try {
@@ -17,9 +24,10 @@ async function main() {
     // Initialize database
     let db = null;
     let userRepository = null;
-    let profileRepository = null;
+    let listasRepository = null;    
     let catastroRepository = null;
-
+    let arriendoRepository = null;
+    let authService= null;
     
     try {
       db = createDatabaseService({
@@ -36,8 +44,12 @@ async function main() {
       Logger.info("Database connected successfully");
       
       userRepository = new UserRepository(db);
-      profileRepository = new ProfileRepository(db);
+      listasRepository = new ListasRepository(db);
       catastroRepository = new CatastroRepository(db);
+      arriendoRepository = new ArriendoRepository(db);
+      authService = new AuthenticationService(userRepository);
+      
+
     } catch (error) {
       Logger.warn("Database connection failed:", (error as Error).message);
     }
@@ -92,7 +104,7 @@ async function main() {
     });
 
     // Basic Auth routes (demo)
-    router.post("/app-alquiler/auth/login", async (ctx: any) => {
+    router.post("/app-alquiler/auth/login11", async (ctx: any) => {
       try {
         console.log("🔐 POST /auth/login - Solicitud de login recibida");
 
@@ -154,70 +166,39 @@ async function main() {
       }
     });
 
-if (userRepository && profileRepository) {
-  createUserRoutes(router,userRepository,profileRepository);
+
+if(authService){
+	 const authRouter = createAuthRoutes(authService);
+  router.use(authRouter.routes(), authRouter.allowedMethods());
 }
+
+if (userRepository && listasRepository) {
+  const userRouter = createUserRoutes(userRepository);
+  router.use(userRouter.routes(), userRouter.allowedMethods());
+  
+}
+
+if (arriendoRepository) {
+  const arriendoRouter = createArriendoRoutes(arriendoRepository);
+  router.use(arriendoRouter.routes(), arriendoRouter.allowedMethods());
+  
+}
+
+
+
     
     // Profile routes
-    if (profileRepository) {
+    if (listasRepository) {
       // GET /app-alquiler/profiles - Obtener todos los perfiles activos
-      router.get("/app-alquiler/profiles", async (ctx: any) => {
-        try {
-          console.log("📋 GET /profiles - Solicitando lista de perfiles activos...");
-          
-          const profiles = await (profileRepository as any).findAllActive();
-          
-          console.log(`✅ Devolviendo ${profiles.length} perfiles activos`);
-          
-          ctx.response.status = 200;
-          ctx.response.body = {
-            success: true,
-            data: profiles,
-            message: "Perfiles obtenidos correctamente",
-            timestamp: new Date().toISOString(),
-          };
-        } catch (error) {
-          console.error("❌ Error al obtener perfiles:", error);
-          ctx.response.status = 500;
-          ctx.response.body = {
-            success: false,
-            message: "Error interno del servidor al obtener perfiles",
-            error: error instanceof Error ? error.message : "Error desconocido",
-            timestamp: new Date().toISOString(),
-          };
-        }
-      });
+     const listasRouter = createProfileRoutes(listasRepository);
+    router.use(listasRouter.routes(), listasRouter.allowedMethods());
     }
 
         // catastro routes
     if (catastroRepository) {
  // GET /app-alquiler/users
-      router.get("/app-alquiler/catastro", async (ctx: any) => {
-        try {
-          console.log("📋 GET /catastro - Solicitando lista de catastro desde base de datos...");
-          
-          const catastro = await (catastroRepository as any).findAll();
-          
-          console.log(`✅ Devolviendo ${catastro.length} catastro  desde base de datos`);
-          
-          ctx.response.status = 200;
-          ctx.response.body = {
-            success: true,
-            data: catastro,
-            message: "Catastro obtenido correctamente desde base de datos",
-            timestamp: new Date().toISOString(),
-          };
-        } catch (error) {
-          console.error("❌ Error al obtener usuarios:", error);
-          ctx.response.status = 500;
-          ctx.response.body = {
-            success: false,
-            message: "Error interno del servidor al obtener usuarios",
-            error: error instanceof Error ? error.message : "Error desconocido",
-            timestamp: new Date().toISOString(),
-          };
-        }
-      });
+  const catastroRouter = createCatastroRoutes(catastroRepository);
+  router.use(catastroRouter.routes(), catastroRouter.allowedMethods());
     }
     else{
         router.get("/app-alquiler/catastros", (ctx: any) => {

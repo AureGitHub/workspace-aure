@@ -1,21 +1,37 @@
 // Catastro Routes - API endpoints for catastro
-import { Router } from "oak";
+import { Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
 import { CatastroRepository } from "../models/catastro.repository.ts";
 
 export function createCatastroRoutes(catastroRepository: CatastroRepository) {
   const router = new Router();
 
   // GET /catastro - Listar todos los catastros
-  router.get("/catastro", async (ctx: any) => {
-    try {
-      const catastros = await catastroRepository.findAll();
-      ctx.response.status = 200;
-      ctx.response.body = { success: true, data: catastros };
-    } catch (error) {
-      ctx.response.status = 500;
-      ctx.response.body = { success: false, error: error.message };
-    }
-  });
+     router.get("/app-alquiler/catastro", async (ctx: any) => {
+        try {
+          console.log("📋 GET /catastro - Solicitando lista de catastro desde base de datos...");
+          
+          const catastro = await (catastroRepository as any).findAll();
+          
+          console.log(`✅ Devolviendo ${catastro.length} catastro  desde base de datos`);
+          
+          ctx.response.status = 200;
+          ctx.response.body = {
+            success: true,
+            data: catastro,
+            message: "Catastro obtenido correctamente desde base de datos",
+            timestamp: new Date().toISOString(),
+          };
+        } catch (error) {
+          console.error("❌ Error al obtener usuarios:", error);
+          ctx.response.status = 500;
+          ctx.response.body = {
+            success: false,
+            message: "Error interno del servidor al obtener usuarios",
+            error: error instanceof Error ? error.message : "Error desconocido",
+            timestamp: new Date().toISOString(),
+          };
+        }
+      });
 
   // GET /catastro/:id - Obtener un catastro por ID
   router.get("/catastro/:id", async (ctx: any) => {

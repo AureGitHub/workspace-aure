@@ -51,14 +51,9 @@ export class AuthController {
   // Login endpoint
   login = async (ctx: any) => {
     try {
-      console.log("=== LOGIN REQUEST ===");
-      console.log("Method:", ctx.request.method);
-      console.log("URL:", ctx.request.url);
-      console.log("Headers:", Object.fromEntries(ctx.request.headers.entries()));
-      
-      // Use the parsed body from the middleware
-      const body = ctx.state.parsedBody;
-      console.log("Parsed request body:", body);
+          
+      const body = await ctx.request.body.text();
+      console.log("body:", body);
 
       if (!body) {
         console.log("No request body found");
@@ -66,11 +61,10 @@ export class AuthController {
         ctx.response.body = ResponseHelper.error("Request body is required");
         return;
       }
-      
-      const loginData: LoginInput = {
-        email: body.email,
-        password: body.password,
-      };
+        
+      const loginData = JSON.parse(body);
+      console.log("loginData:", loginData);
+
 
       if (!loginData.email || !loginData.password) {
         console.log("Missing email or password");

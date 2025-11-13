@@ -124,7 +124,7 @@ export interface TableConfig {
                     {{ rowData[col.field] }}
                   </span>
                   <span *ngSwitchCase="'date'">
-                    {{ formatDate(rowData[col.field]) }}
+                    {{ rowData[col.field]  | date:'dd/MM/yyyy' }}
                   </span>
                   <span *ngSwitchCase="'boolean'">
                     <span [class]="rowData[col.field] ? 'status-true' : 'status-false'">

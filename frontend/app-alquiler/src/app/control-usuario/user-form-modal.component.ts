@@ -19,7 +19,6 @@ interface User {
 }
 
 interface UserFormData {
-  username?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -46,23 +45,6 @@ interface UserFormData {
     <ion-content class="ion-padding">
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
         
-        <!-- Username - Solo para nuevos usuarios -->
-        <ion-item *ngIf="!isEdit">
-          <ion-label position="stacked">
-            Nombre de Usuario *
-            <ion-text color="danger" *ngIf="isFieldInvalid('username')">
-              <small>{{ getFieldError('username') }}</small>
-            </ion-text>
-          </ion-label>
-          <ion-input 
-            formControlName="username"
-            maxlength="50"
-            placeholder="Ingrese nombre de usuario"
-            [class.ion-invalid]="isFieldInvalid('username')"
-            [class.ion-touched]="f['username']?.touched">
-          </ion-input>
-        </ion-item>
-
         <!-- Nombre -->
         <ion-item>
           <ion-label position="stacked">
@@ -270,7 +252,6 @@ export class UserFormModalComponent implements OnInit {
       // Formulario para nuevo usuario con datos de prueba
       const timestamp = Date.now();
       this.userForm = this.formBuilder.group({
-        username: [`testuser${timestamp}`, [Validators.required, Validators.maxLength(50)]],
         first_name: ['Test Usuario', [Validators.required, Validators.maxLength(50)]],
         last_name: ['De Prueba', [Validators.required, Validators.maxLength(50)]],
         email: [`test${timestamp}@example.com`, [Validators.required, Validators.email, Validators.maxLength(100)]],

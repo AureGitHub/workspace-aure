@@ -85,6 +85,8 @@ export class ApiService {
     const url = this.buildUrl(endpoint);
     const httpOptions = this.buildHttpOptions(options);
 
+    console.log('body en post api dll', body);
+
     return (this.http.post<T>(url, body, httpOptions) as Observable<T>).pipe(
       timeout(this.config.timeout!),
       retry(this.config.retryAttempts!),

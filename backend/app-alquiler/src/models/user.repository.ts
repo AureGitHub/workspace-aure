@@ -1,10 +1,115 @@
 // User Repository - Database operations for users
 import { BaseRepository, DatabaseService } from "@common-lib/database/mod.ts";
-import { User, CreateUserInput, UpdateUserInput } from "./types.ts";
+import { User, CreateUserInput, UpdateUserInput, Profile } from "./types.ts";
 
 export class UserRepository extends BaseRepository<User> {
   constructor(db: DatabaseService) {
     super(db, '"app-alquiler".users');
+  }
+
+
+
+  async Validar(ctx: any,id :number | undefined,  data: any): Promise<boolean> {
+
+    const { first_name, last_name, email, password, profile_id } = data;
+    if (!first_name || !last_name || !email  || !profile_id) {
+            
+      ctx.response.status = 400;
+      ctx.response.body = {
+        success: false,
+        message: "Todos los campos son obligatorios (first_name, last_name, email, password, profile_id)",
+        timestamp: new Date().toISOString(),
+      };
+      return false;      
+    }
+
+    if (!password && !id) {
+      ctx.response.status = 400;
+      ctx.response.body = {
+        success: false,
+        message: "En el alta, la contraseña es obligatoria",
+        timestamp: new Date().toISOString(),
+      };
+      return false;      
+
+    }
+
+
+    // Validar profile_id          
+    const validaProfile =  await this.ValidarProfileById(ctx,profile_id);                  
+    if(!validaProfile){              
+      console.error("❌ Error validando perfil:", profile_id);            
+      return false;
+    }
+
+    const validaEmail =  await this.ValidarEmail(ctx,email,id);                  
+    if(!validaEmail){              
+      console.error("❌ Error validando email:", email);            
+      return false;
+    }
+
+    return true;
+  }
+
+async ValidarEmail(ctx: any,email: string,id? : number): Promise<boolean> {
+
+         // Validar formato de email
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+              success: false,
+              message: "Formato de email inválido",
+              timestamp: new Date().toISOString(),
+            };
+            return false;
+          }
+
+          // Verificar si el email ya existe
+          console.log(`🔍 Verificando si email ${email} ya existe...`);
+          const emailExists = await this.emailExists(email,id);
+          if (emailExists) {
+             console.log(`❌ El email ya está registrado...`);
+            ctx.response.status = 409;
+            ctx.response.body = {
+              success: false,
+              message: "El email ya está registrado",
+              timestamp: new Date().toISOString(),
+            };
+            return false;
+          }
+
+  return true;
+}
+
+
+   // Find profile by description
+  async ValidarProfileById(ctx: any,profile_id: any): Promise<boolean> {
+    const profileIdNum = parseInt(profile_id);
+          if (isNaN(profileIdNum) || profileIdNum < 1) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+              success: false,
+              message: "profile_id debe ser un número válido",
+              timestamp: new Date().toISOString(),
+            };
+            return false;
+          }
+
+          // Verificar que el profile_id existe
+          console.log(`🔍 Verificando si profile_id ${profileIdNum} existe...`);
+          const profileExists = await  this.db.queryOne<Profile>(`SELECT * FROM "app-alquiler".profiles WHERE id = $1`,[profileIdNum]);
+          if (!profileExists) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+              success: false,
+              message: "El profile_id especificado no existe",
+              timestamp: new Date().toISOString(),
+            };
+            return false;
+          }
+    return true;
+    
   }
 
   // Find user by email
@@ -15,13 +120,6 @@ export class UserRepository extends BaseRepository<User> {
     );
   }
 
-  // Find user by username
-  async findByUsername(username: string): Promise<User | null> {
-    return await this.db.queryOne<User>(
-      `SELECT * FROM ${this.tableName} WHERE username = $1`,
-      [username]
-    );
-  }
 
   // Find users by profile
   async findByProfile(profileId: number): Promise<User[]> {
@@ -55,25 +153,7 @@ export class UserRepository extends BaseRepository<User> {
     );
   }
 
-  // Create user with hashed password
-  async createUser(data: CreateUserInput, passwordHash: string): Promise<User> {
-    const { password, ...userData } = data;
-    const fields = Object.keys(userData).join(", ");
-    const values = Object.values(userData);
-    const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
-
-    const result = await this.db.queryOne<User>(
-      `INSERT INTO ${this.tableName} (${fields}, password_hash, created_at, updated_at) 
-       VALUES (${placeholders}, $${values.length + 1}, NOW(), NOW()) RETURNING *`,
-      [...values, passwordHash]
-    );
-
-    if (!result) {
-      throw new Error("Failed to create user");
-    }
-
-    return result;
-  }
+ 
 
   // Update user email verification status
   async verifyEmail(id: number): Promise<User | null> {
@@ -113,22 +193,9 @@ export class UserRepository extends BaseRepository<User> {
     return parseInt(result?.count || "0") > 0;
   }
 
-  // Check if username exists
-  async usernameExists(username: string, excludeId?: number): Promise<boolean> {
-    let query = `SELECT COUNT(*) as count FROM ${this.tableName} WHERE username = $1`;
-    const params: any[] = [username];
-
-    if (excludeId) {
-      query += ` AND id != $2`;
-      params.push(excludeId);
-    }
-
-    const result = await this.db.queryOne<{ count: string }>(query, params);
-    return parseInt(result?.count || "0") > 0;
-  }
 
   // Override create method to handle password hashing in a simpler way
-  async createUserSimple(data: CreateUserInput): Promise<User> {
+  async createUser(data: CreateUserInput): Promise<User> {
     // Simple password hash for demo (use bcrypt in production)
     const encoder = new TextEncoder();
     const passwordData = encoder.encode(data.password);

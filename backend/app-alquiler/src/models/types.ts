@@ -138,7 +138,6 @@ export interface UpdateProfileInput extends Partial<CreateProfileInput> {}
 
 // Create User Input
 export interface CreateUserInput {
-  username: string;
   email: string;
   password: string;
   first_name: string;

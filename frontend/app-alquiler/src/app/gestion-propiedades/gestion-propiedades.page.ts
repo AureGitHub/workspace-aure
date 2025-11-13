@@ -4,6 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
+
 import {
   businessOutline,
   alertCircleOutline,
@@ -39,25 +40,23 @@ interface Catastro {
     <ion-content [fullscreen]="true" class="gestion-propiedades-content">
       <div class="table-section">
         <!-- Buscador con check Felipe, Agrario, Residencial y búsqueda por texto -->
-        <div class="search-section">
-          <ion-item>
+        <div class="search-section" style="display: flex; align-items: center; gap: 16px;">
+          <ion-item style="flex: 1;">
             <ion-label class="buscador-label">Buscar</ion-label>
             <ion-input [(ngModel)]="searchText" (ionInput)="onSearchChange()" placeholder="Dirección o referencia..." class="buscador-input"></ion-input>
           </ion-item>
-          <div class="checks-row">
-            <ion-item>
-              <ion-label>Felipe</ion-label>
-              <ion-checkbox slot="end" [(ngModel)]="showFelipe" (ionChange)="onFelipeChange()"></ion-checkbox>
-            </ion-item>
-            <ion-item>
-              <ion-label>Agrario</ion-label>
-              <ion-checkbox slot="end" [(ngModel)]="showAgrario" (ionChange)="onAgrarioChange()"></ion-checkbox>
-            </ion-item>
-            <ion-item>
-              <ion-label>Residencial</ion-label>
-              <ion-checkbox slot="end" [(ngModel)]="showResidencial" (ionChange)="onResidencialChange()"></ion-checkbox>
-            </ion-item>
-          </div>
+          <ion-item>
+            <ion-label>Felipe</ion-label>
+            <ion-checkbox slot="end" [(ngModel)]="showFelipe" (ionChange)="onFelipeChange()"></ion-checkbox>
+          </ion-item>
+          <ion-item>
+            <ion-label>Agrario</ion-label>
+            <ion-checkbox slot="end" [(ngModel)]="showAgrario" (ionChange)="onAgrarioChange()"></ion-checkbox>
+          </ion-item>
+          <ion-item>
+            <ion-label>Residencial</ion-label>
+            <ion-checkbox slot="end" [(ngModel)]="showResidencial" (ionChange)="onResidencialChange()"></ion-checkbox>
+          </ion-item>
         </div>
         <div *ngIf="loading" class="loading-container">
           <ion-spinner name="crescent"></ion-spinner>
@@ -77,7 +76,7 @@ interface Catastro {
                 <ion-card-header>
                   <div class="icon-title-row">
                     <fa-icon *ngIf="c.catastrotipoid === 1" [icon]="faBuilding" style="color: #1976d2;"></fa-icon>
-                    <fa-icon *ngIf="c.catastrotipoid === 2" [icon]="faTree" style="color: green;"></fa-icon>
+                    <i *ngIf="c.catastrotipoid === 2" class="ri-tree-fill" style="color: green; font-size: 2rem;"></i>
                     <ion-card-title>{{ c.direccion }}</ion-card-title>
                   </div>
                   <ion-card-subtitle>{{ c.referenciacatastral }}</ion-card-subtitle>
@@ -131,6 +130,16 @@ interface Catastro {
       display: flex;
       align-items: center;
       gap: 6px;
+      height: 2.5rem;
+    }
+    .icon-title-row fa-icon,
+    .icon-title-row .ri-tree-fill {
+      display: flex;
+      align-items: center;
+      height: 2rem;
+      line-height: 1;
+      vertical-align: middle;
+      margin-top: 2px;
     }
     .card-actions-row {
       display: flex;
@@ -223,8 +232,9 @@ interface Catastro {
       gap: 16px;
     }
     .catastro-card {
-      flex: 1 1 calc(16.666% - 16px);
-      min-width: 0;
+      flex: 1 1 calc(25% - 16px);
+      min-width: 280px;
+      max-width: 400px;
       box-sizing: border-box;
       margin-bottom: 16px;
     }
