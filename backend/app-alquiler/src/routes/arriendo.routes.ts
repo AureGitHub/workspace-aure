@@ -5,13 +5,13 @@ export function createArriendoRoutes(arriendoRepository: ArriendoRepository): Ro
   const router = new Router();
 
   // GET /app-alquiler/arriendos
-  router.get("/app-alquiler/arriendos", async (ctx) => {
+  router.get("/app-alquiler/arriendos", async (ctx: any) => {
     const arriendos = await arriendoRepository.findAll();
     ctx.response.body = { success: true, data: arriendos };
   });
 
   // GET /app-alquiler/arriendos/:id
-  router.get("/app-alquiler/arriendos/:id", async (ctx) => {
+  router.get("/app-alquiler/arriendos/:id", async (ctx: any) => {
     const id = Number(ctx.params.id);
     console.log('id param',id);
     const arriendo = await arriendoRepository.findById(id);
@@ -23,13 +23,64 @@ export function createArriendoRoutes(arriendoRepository: ArriendoRepository): Ro
     }
   });
 
-  // POST /app-alquiler/arriendos
-  router.post("/app-alquiler/arriendos", async (ctx) => {
-    const body = await ctx.request.body({ type: "json" }).value;
-    const nuevo = await arriendoRepository.insert(body);
-    ctx.response.status = 201;
-    ctx.response.body = { success: true, data: nuevo };
-  });
+
+
+
+    router.post("/app-alquiler/arriendos", async (ctx: any) => {
+        try {
+          let userData; 
+          const bodyText = await ctx.request.body.text();           
+          userData = JSON.parse(bodyText);
+           console.log(`📝 userData`,userData);
+          if (!userData) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+              success: false,
+              message: `Datos del arriendo inválidos o vacíos. Tipo de body: ${bodyText}`,
+              timestamp: new Date().toISOString(),
+            };
+            return;
+          }
+
+          // Validar 
+          const validar = await arriendoRepository.Validar(ctx,undefined,userData);    
+          if(!validar){
+            return;
+          }
+          
+          // Crear el usuario en la base de datos
+          console.log(`📝 Creando arriendo en la base de datos...`);
+          const newUser = await arriendoRepository.createArriendo(userData);
+          if (!newUser) {
+            ctx.response.status = 500;
+            ctx.response.body = {
+              success: false,
+              message: "Error al crear arriendo en la base de datos",
+              timestamp: new Date().toISOString(),
+            };
+            return;
+          }
+
+          ctx.response.status = 201;
+          ctx.response.body = {
+            success: true,
+            data: newUser,
+            message: "Arriendo creado exitosamente",
+            timestamp: new Date().toISOString(),
+          };
+          
+        } catch (error) {
+          console.error("❌ Error al crear arriendo:", error);
+          ctx.response.status = 500;
+          ctx.response.body = {
+            success: false,
+            message: "Error interno del servidor al crear usuario",
+            error: error instanceof Error ? error.message : "Error desconocido",
+            timestamp: new Date().toISOString(),
+          };
+        }
+      });
+
 
   // PUT /app-alquiler/arriendos/:id
   router.put("/app-alquiler/arriendos/:id", async (ctx) => {

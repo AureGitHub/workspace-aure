@@ -14,7 +14,8 @@ import {
 import { PageTitleService } from '../services';
 import { ApiService } from 'shared-lib';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faTree, faBuilding, faInfoCircle, faKey } from '@fortawesome/free-solid-svg-icons';
+import { faTree, faBuilding, faInfoCircle, faEuroSign } from '@fortawesome/free-solid-svg-icons';
+import { ModalController } from '@ionic/angular';
 
 interface Catastro {
   id: number;
@@ -85,7 +86,7 @@ interface Catastro {
                   <div class="card-actions-row">
                     <fa-icon [icon]="faInfoCircle" class="detalle-icon" (click)="openDetalle(c)" title="Ver detalle" style="color: #1976d2; cursor: pointer;"></fa-icon>
                     <span class="actions-spacer"></span>
-                    <fa-icon [icon]="faKey" class="alquiler-icon" title="Alquiler" style="color: #ff9800;"></fa-icon>
+                    <fa-icon [icon]="faEuroSign" class="alquiler-icon" title="Alquiler / Valor" style="color: #2ecc40; cursor:pointer;" (click)="openArriendoModal(c.id)"></fa-icon>
                   </div>
                 </ion-card-content>
               </ion-card>
@@ -123,6 +124,7 @@ interface Catastro {
           </ng-template>
         </ion-modal>
       </div>
+      <div style="height: 48px;"></div>
     </ion-content>
   `,
   styles: [`
@@ -292,6 +294,9 @@ interface Catastro {
   `]
 })
 export class GestionPropiedadesPage implements OnInit {
+      // ...existing code...
+      // Método para refrescar arriendos (debe llamarse tras crear un arriendo)
+      
   loading = false;
   error: string | null = null;
   catastros: Catastro[] = [];
@@ -305,13 +310,14 @@ export class GestionPropiedadesPage implements OnInit {
   faTree = faTree;
   faBuilding = faBuilding;
   faInfoCircle = faInfoCircle;
-  faKey = faKey;
+  faEuroSign = faEuroSign;
 
   constructor(
     private router: Router,
     private cdr: ChangeDetectorRef,
     private pageTitleService: PageTitleService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private modalController: ModalController
   ) {
     addIcons({
       'business-outline': businessOutline,
@@ -326,6 +332,25 @@ export class GestionPropiedadesPage implements OnInit {
     this.pageTitleService.setTitle('Gestión de Propiedades');
     this.loadCatastros();
   }
+
+
+  refreshArriendos() {
+        this.loadCatastros();
+      }
+   async openArriendoModal(catastroid: number) {
+  const modal = await this.modalController.create({
+    component: (await import('../ver-gestion-alquiler/arriendo-form-modal.component')).ArriendoFormModalComponent,
+    componentProps: {
+      isEdit: false,
+      arriendo: { catastroid }
+    }
+  });
+  await modal.present();
+  const { data, role } = await modal.onWillDismiss();
+  if (role === 'confirm' && data) {
+    this.refreshArriendos();
+  }
+}
 
   loadCatastros() {
     this.loading = true;

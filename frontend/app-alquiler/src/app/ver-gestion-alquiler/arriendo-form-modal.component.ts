@@ -134,6 +134,15 @@ export class ArriendoFormModalComponent implements OnInit {
         quien: [this.arriendo.quien ?? '', [Validators.required]],
         observaciones: [this.arriendo.observaciones ?? '']
       });
+    } else if (this.arriendo && this.arriendo.catastroid) {
+      // Si se pasa catastroid desde el modal de alta, usarlo como valor inicial
+      this.arriendoForm = this.formBuilder.group({
+        catastroid: [this.arriendo.catastroid, [Validators.required]],
+        fechapago: ['', [Validators.required]],
+        importe: ['', [Validators.required]],
+        quien: ['', [Validators.required]],
+        observaciones: ['']
+      });
     } else {
       this.arriendoForm = this.formBuilder.group({
         catastroid: ['', [Validators.required]],
