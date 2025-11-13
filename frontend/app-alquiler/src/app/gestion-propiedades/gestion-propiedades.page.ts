@@ -109,7 +109,6 @@ interface Catastro {
             </ion-header>
             <ion-content>
               <div *ngIf="selectedCatastro">
-                <p><strong>Tipo1:</strong> {{ selectedCatastro.catastrotipoid }}</p>
                 <p><strong>Felipe:</strong> {{ selectedCatastro.felipe ? 'Sí' : 'No' }}</p>
                 <p><strong>Polígono:</strong> {{ selectedCatastro.poligono || '-' }}</p>
                 <p><strong>Parcela:</strong> {{ selectedCatastro.parcela || '-' }}</p>
@@ -119,6 +118,9 @@ interface Catastro {
                 <p><strong>Valor suelo:</strong> {{ selectedCatastro.valorsuelo | number:'1.2-2' }} €</p>
                 <p><strong>Valor construcción:</strong> {{ selectedCatastro.valorconstruccion | number:'1.2-2' }} €</p>
                 <p><strong>Valor catastral:</strong> {{ selectedCatastro.valorcatastral | number:'1.2-2' }} €</p>
+                <div style="text-align:center; margin-top: 24px;">
+                  <ion-button color="primary" (click)="closeDialog()">Cerrar</ion-button>
+                </div>
               </div>
             </ion-content>
           </ng-template>
@@ -128,6 +130,13 @@ interface Catastro {
     </ion-content>
   `,
   styles: [`
+        ion-modal ion-content {
+          padding: 40px 32px 32px 32px;
+          border-radius: 18px;
+        }
+        ion-modal ion-content div {
+          padding: 16px 12px 16px 12px;
+        }
     .icon-title-row {
       display: flex;
       align-items: center;
@@ -188,6 +197,21 @@ interface Catastro {
       max-width: 1200px;
       margin: 0 auto;
       padding-bottom: 40px;
+    }
+    ion-modal {
+      --width: 380px;
+      --height: 560px;
+      min-height: 320px;
+      max-height: 700px;
+      margin-left: 80px;
+    }
+    /* Eliminar restricciones de altura y scroll para que la modal se ajuste al contenido */
+    @media (max-width: 500px) {
+      ion-modal {
+        --width: 95vw;
+        --height: 80vh;
+        margin-left: 0;
+      }
     }
     .loading-container {
       text-align: center;
