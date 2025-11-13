@@ -11,7 +11,7 @@ import { createArriendoRoutes } from "./routes/arriendo.routes.ts";
 import { AuthenticationService } from "./services/auth.service.ts";
 import { createAuthRoutes } from "./routes/auth.routes.ts";
 import { createCatastroRoutes } from "./routes/catastro.routes.ts";
-import { createProfileRoutes } from "./routes/profile.routes.ts";
+import { createListasRoutes } from "./routes/listas.routes.ts";
 import { ListasRepository } from "./models/listas.repository.ts";
 
 async function main() {
@@ -103,70 +103,6 @@ async function main() {
       };
     });
 
-    // Basic Auth routes (demo)
-    router.post("/app-alquiler/auth/login11", async (ctx: any) => {
-      try {
-        console.log("🔐 POST /auth/login - Solicitud de login recibida");
-
-        // Mock login for demo - accept any credentials
-        const mockUser = {
-          id: 1,
-          first_name: "Admin",
-          last_name: "Demo",
-          email: "admin@alquilerzarza.com",
-          user_type: "admin"
-        };
-
-        // Mock JWT token
-        const mockToken = "demo-jwt-token-12345";
-
-        console.log("✅ Login exitoso para usuario demo");
-
-        ctx.response.status = 200;
-        ctx.response.body = {
-          success: true,
-          data: {
-            user: mockUser,
-            token: mockToken
-          },
-          message: "Login exitoso (demo)",
-          timestamp: new Date().toISOString(),
-        };
-      } catch (error) {
-        console.error("❌ Error en login:", error);
-        ctx.response.status = 500;
-        ctx.response.body = {
-          success: false,
-          message: "Error interno del servidor en login",
-          error: error instanceof Error ? error.message : "Error desconocido",
-          timestamp: new Date().toISOString(),
-        };
-      }
-    });
-
-    router.post("/app-alquiler/auth/register", async (ctx: any) => {
-      try {
-        console.log("📝 POST /auth/register - Solicitud de registro recibida");
-        
-        ctx.response.status = 201;
-        ctx.response.body = {
-          success: true,
-          message: "Funcionalidad de registro próximamente disponible",
-          timestamp: new Date().toISOString(),
-        };
-      } catch (error) {
-        console.error("❌ Error en registro:", error);
-        ctx.response.status = 500;
-        ctx.response.body = {
-          success: false,
-          message: "Error interno del servidor en registro",
-          error: error instanceof Error ? error.message : "Error desconocido",
-          timestamp: new Date().toISOString(),
-        };
-      }
-    });
-
-
 if(authService){
 	 const authRouter = createAuthRoutes(authService);
   router.use(authRouter.routes(), authRouter.allowedMethods());
@@ -190,7 +126,7 @@ if (arriendoRepository) {
     // Profile routes
     if (listasRepository) {
       // GET /app-alquiler/profiles - Obtener todos los perfiles activos
-     const listasRouter = createProfileRoutes(listasRepository);
+     const listasRouter = createListasRoutes(listasRepository);
     router.use(listasRouter.routes(), listasRouter.allowedMethods());
     }
 

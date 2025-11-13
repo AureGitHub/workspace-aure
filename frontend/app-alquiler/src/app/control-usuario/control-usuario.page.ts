@@ -354,7 +354,7 @@ export class ControlUsuarioPage implements OnInit {
     console.log('🔄 loadProfiles() iniciado...');
     
     // Usar el ApiService para obtener los perfiles
-    this.apiService.get<{success: boolean, data: any[]}>('/app-alquiler/profiles')
+    this.apiService.get<{success: boolean, data: any[]}>('/app-alquiler/lista/profiles')
       .subscribe({
         next: (response) => {
           console.log('✅ Respuesta del servidor (loadProfiles):', response);
