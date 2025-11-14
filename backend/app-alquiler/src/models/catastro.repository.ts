@@ -27,7 +27,16 @@ export class CatastroRepository extends BaseRepository<Catastro> {
 
 
         const result = await this.db.query<Catastro>(
-          `SELECT * FROM ${this.tableName} `,
+          `select 
+a.fechapago , a.importe,a.quien ,
+T1.*
+from 
+(
+select 
+(select a.id from "app-alquiler".arriendo a where a.catastroid = c.id  order by a.fechapago desc limit  1) arriendoid,
+c.*
+from "app-alquiler".catastro c  
+)T1 left join "app-alquiler".arriendo a on T1.arriendoid =a.id `,
           []
         );
         return result.rows;

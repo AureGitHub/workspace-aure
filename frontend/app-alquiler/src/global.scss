@@ -36,3 +36,18 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+
+ion-content {
+    overflow-y: auto !important;
+    touch-action: pan-y !important;
+    height: 100% !important;
+}
+
+
+.app-alquiler-content {
+    background: red;
+    height: 100%;
+    overflow-y: auto;
+    display: block;
+}

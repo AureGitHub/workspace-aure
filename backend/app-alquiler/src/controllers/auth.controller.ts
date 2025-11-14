@@ -75,7 +75,7 @@ export class AuthController {
 
       console.log(`🔐 Login attempt: ${loginData.email}`);
       const authResult = await this.authService.login(loginData);
-      console.log(`✅ Login successful for: ${loginData.email}`);
+      console.log(`✅ Login successful for: ${authResult}`);
       
       ctx.response.status = HTTP_STATUS.OK;
       ctx.response.body = ResponseHelper.success(authResult, "Login successful");

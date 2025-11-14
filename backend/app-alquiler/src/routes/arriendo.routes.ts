@@ -24,6 +24,20 @@ export function createArriendoRoutes(arriendoRepository: ArriendoRepository): Ro
   });
 
 
+    router.get("/app-alquiler/arriendos-pagos/:id", async (ctx: any) => {
+    const id = Number(ctx.params.id);
+    console.log('id param',id);
+    const arriendo = await arriendoRepository.findByCatastroId(id);
+    if (arriendo) {
+      ctx.response.body = { success: true, data: arriendo };
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { success: false, message: "Arriendo no encontrado" };
+    }
+  });
+
+
+
 
 
     router.post("/app-alquiler/arriendos", async (ctx: any) => {
@@ -83,28 +97,126 @@ export function createArriendoRoutes(arriendoRepository: ArriendoRepository): Ro
 
 
   // PUT /app-alquiler/arriendos/:id
-  router.put("/app-alquiler/arriendos/:id", async (ctx) => {
-    const id = Number(ctx.params.id);
-    const body = await ctx.request.body({ type: "json" }).value;
-    const actualizado = await arriendoRepository.update(id, body);
-    if (actualizado) {
-      ctx.response.body = { success: true, data: actualizado };
-    } else {
-      ctx.response.status = 404;
-      ctx.response.body = { success: false, message: "Arriendo no encontrado" };
+  router.put("/app-alquiler/arriendos/:id", async (ctx: any) => {
+   
+    
+    try{
+const id = parseInt(ctx.params?.id);
+          
+    if (!id || isNaN(id)) {
+      ctx.response.status = 400;
+      ctx.response.body = {
+        success: false,
+        message: "ID de usuario inválido",
+        timestamp: new Date().toISOString(),
+      };
+      return;
+    }      
+    const bodyText = await ctx.request.body.text();
+    let updateArriendo = JSON.parse(bodyText);
+
+    const validar = await arriendoRepository.Validar(ctx,id,updateArriendo);    
+    if(!validar){
+      return;      
     }
+    const arriendo = await arriendoRepository.findById(id);
+
+    if (!arriendo) {
+      ctx.response.status = 404;
+      ctx.response.body = {
+        success: false,
+        message: "Arriendo no encontrado",
+        timestamp: new Date().toISOString(),
+      };
+      return;
+    }
+    const updatedArriendo = arriendoRepository.updateArriendo(id, updateArriendo);
+    ctx.response.status = 200;
+    ctx.response.body = {
+      success: true,
+      data: updatedArriendo,
+      message: "Usuario actualizado correctamente",
+      timestamp: new Date().toISOString(),  
+    };
+    }
+    catch(error){
+ 
+      console.error("🚀 Error en PUT NUEVO:", error);
+      ctx.response.status = 500;
+      ctx.response.body = {
+        success: false,
+        message: "Error interno del servidor",
+        error: error instanceof Error ? error.message : "Error desconocido",
+        timestamp: new Date().toISOString(),
+      };
+    }
+
   });
 
   // DELETE /app-alquiler/arriendos/:id
-  router.delete("/app-alquiler/arriendos/:id", async (ctx) => {
-    const id = Number(ctx.params.id);
-    const eliminado = await arriendoRepository.delete(id);
-    if (eliminado) {
-      ctx.response.body = { success: true, data: eliminado };
-    } else {
-      ctx.response.status = 404;
-      ctx.response.body = { success: false, message: "Arriendo no encontrado" };
+  router.delete("/app-alquiler/arriendos/:id", async (ctx: any) => {
+
+    try{
+ const id = parseInt(ctx.params?.id);
+          
+      if (!id || isNaN(id)) {
+        ctx.response.status = 400;
+        ctx.response.body = {
+          success: false,
+          message: "ID de usuario inválido",
+          timestamp: new Date().toISOString(),
+        };
+        return;
+      }
+              
+      const existingArriendo = await arriendoRepository.findById(id);
+      if (!existingArriendo) {
+        ctx.response.status = 404;
+        ctx.response.body = {
+          success: false,
+          message: "Arriendo no encontrado",
+          timestamp: new Date().toISOString(),
+        };
+        return;
+      }
+
+          // Eliminar el usuario de la base de datos
+          
+      const deleted = await arriendoRepository.deleteArriendo(id);
+
+       if (!deleted) {
+          ctx.response.status = 500;
+          ctx.response.body = {
+            success: false,
+            message: "Error al eliminar arriendo de la base de datos",
+            timestamp: new Date().toISOString(),
+          };
+          return;
+        }
+
+        console.log(`✅ Arriendo con ID ${id} eliminado exitosamente de la base de datos`);
+
+        ctx.response.status = 200;
+        ctx.response.body = {
+          success: true,
+          message: `Arriendo con ID ${id} eliminado exitosamente`,
+          data: { id},
+          timestamp: new Date().toISOString(),
+        };
     }
+    catch(error){
+      console.error("❌ Error al eliminar Arriendo:", error);
+          ctx.response.status = 500;
+          ctx.response.body = {
+            success: false,
+            message: "Error interno del servidor al eliminar usuario",
+            error: error instanceof Error ? error.message : "Error desconocido",
+            timestamp: new Date().toISOString(),
+          };
+
+    }
+
+    
   });
 
   return router;

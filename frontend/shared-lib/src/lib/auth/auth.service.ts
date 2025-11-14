@@ -6,6 +6,13 @@ import { ApiService } from '../api/api.service';
 import { User, BackendLoginRequest, BackendRegisterRequest, BackendAuthResponse } from './auth.interfaces';
 import { SharedLibConfigService } from '../config/shared-lib-config.service';
 
+
+export enum Rol {
+  admin = 1,
+  owner = 2,
+  tenant = 3
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -187,21 +194,21 @@ export class AuthService {
    * Verifica si el usuario es propietario
    */
   isOwner(): boolean {
-    return this.getCurrentUser()?.user_type === 'owner';
+    return this.getCurrentUser()?.profile_id === Rol.owner;
   }
 
   /**
    * Verifica si el usuario es inquilino
    */
   isTenant(): boolean {
-    return this.getCurrentUser()?.user_type === 'tenant';
+    return this.getCurrentUser()?.profile_id === Rol.tenant;
   }
 
   /**
    * Verifica si el usuario es administrador
    */
   isAdmin(): boolean {
-    return this.getCurrentUser()?.user_type === 'admin';
+    return this.getCurrentUser()?.profile_id === Rol.admin;
   }
 
   /**

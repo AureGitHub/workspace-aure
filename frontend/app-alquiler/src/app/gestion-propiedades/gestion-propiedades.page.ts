@@ -1,3 +1,4 @@
+// ...existing code...
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
@@ -19,6 +20,9 @@ import { ModalController } from '@ionic/angular';
 
 interface Catastro {
   id: number;
+  fechapago: Date,
+  importe: number;
+   quien: string;
   catastrotipoid: number;
   felipe: boolean;
   referenciacatastral: string;
@@ -33,6 +37,12 @@ interface Catastro {
   valorcatastral: number;
 }
 
+interface PagoCatastro{
+    fechapago: Date,
+  importe: number;
+   quien: string;  
+}
+
 @Component({
   selector: 'app-gestion-propiedades',
   standalone: true,
@@ -41,23 +51,31 @@ interface Catastro {
     <ion-content [fullscreen]="true" class="gestion-propiedades-content">
       <div class="table-section">
         <!-- Buscador con check Felipe, Agrario, Residencial y búsqueda por texto -->
-        <div class="search-section" style="display: flex; align-items: center; gap: 16px;">
-          <ion-item style="flex: 1;">
-            <ion-label class="buscador-label">Buscar</ion-label>
-            <ion-input [(ngModel)]="searchText" (ionInput)="onSearchChange()" placeholder="Dirección o referencia..." class="buscador-input"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>Felipe</ion-label>
-            <ion-checkbox slot="end" [(ngModel)]="showFelipe" (ionChange)="onFelipeChange()"></ion-checkbox>
-          </ion-item>
-          <ion-item>
-            <ion-label>Agrario</ion-label>
-            <ion-checkbox slot="end" [(ngModel)]="showAgrario" (ionChange)="onAgrarioChange()"></ion-checkbox>
-          </ion-item>
-          <ion-item>
-            <ion-label>Residencial</ion-label>
-            <ion-checkbox slot="end" [(ngModel)]="showResidencial" (ionChange)="onResidencialChange()"></ion-checkbox>
-          </ion-item>
+        <div class="search-section">
+          <div class="search-row">
+            <ion-item style="flex: 1;">
+              <ion-label class="buscador-label">Buscar</ion-label>
+              <ion-input [(ngModel)]="searchText" (ionInput)="onSearchChange()" placeholder="Dirección o referencia..." class="buscador-input"></ion-input>
+            </ion-item>
+          </div>
+          <div class="checks-row">
+            <div class="check-col">
+              <div class="check-label">Felipe</div>
+              <ion-checkbox [(ngModel)]="showFelipe" (ionChange)="onFelipeChange()"></ion-checkbox>
+            </div>
+            <div class="check-col">
+              <div class="check-label">Agrario</div>
+              <ion-checkbox [(ngModel)]="showAgrario" (ionChange)="onAgrarioChange()"></ion-checkbox>
+            </div>
+            <div class="check-col">
+              <div class="check-label">Residencial</div>
+              <ion-checkbox [(ngModel)]="showResidencial" (ionChange)="onResidencialChange()"></ion-checkbox>
+            </div>
+            <div class="check-col">
+              <div class="check-label">Pagado</div>
+              <ion-checkbox [(ngModel)]="showPagado" (ionChange)="onPagadoChange()"></ion-checkbox>
+            </div>
+          </div>
         </div>
         <div *ngIf="loading" class="loading-container">
           <ion-spinner name="crescent"></ion-spinner>
@@ -86,7 +104,14 @@ interface Catastro {
                   <div class="card-actions-row">
                     <fa-icon [icon]="faInfoCircle" class="detalle-icon" (click)="openDetalle(c)" title="Ver detalle" style="color: #1976d2; cursor: pointer;"></fa-icon>
                     <span class="actions-spacer"></span>
+                    <span *ngIf="c.fechapago" class="fechapago-label-centered">
+                      <span  (click)="openFechapagoModal(c)" style="cursor:pointer;">
+                        {{ c.fechapago ? (c.fechapago | date:'dd/MM/yyyy') : '' }}
+                      </span>
+                    </span>
+                    <span class="actions-spacer"></span>
                     <fa-icon [icon]="faEuroSign" class="alquiler-icon" title="Alquiler / Valor" style="color: #2ecc40; cursor:pointer;" (click)="openArriendoModal(c.id)"></fa-icon>
+                    
                   </div>
                 </ion-card-content>
               </ion-card>
@@ -97,6 +122,42 @@ interface Catastro {
           </ng-template>
         </div>
         <!-- Dialog Detalle -->
+        <ion-modal [isOpen]="showFechapagoModal" (didDismiss)="closeFechapagoModal()">
+          <ng-template>
+            <ion-header>
+              <ion-toolbar>
+                <ion-title>Detalle de Pago</ion-title>
+                <ion-buttons slot="end">
+                  <ion-button (click)="closeFechapagoModal()">Cerrar</ion-button>
+                </ion-buttons>
+              </ion-toolbar>
+            </ion-header>
+            <ion-content>
+              <div >
+                <table class="fechapago-table">
+                  <thead>
+                    <tr>
+                      <th>Pago</th>
+                      <th>Importe</th>
+                      <th>Quién</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let pago of lstPagosCatastro">
+                      <td>{{ pago.fechapago ? (pago.fechapago | date:'dd/MM/yyyy') : '-' }}</td>
+                      <td>{{ pago.importe !== undefined && pago.importe !== null ? (pago.importe | currency:'EUR':'symbol':'1.2-2':'es-ES') : '-' }}</td>
+                      <td>{{ pago.quien }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style="text-align:center; margin-top: 24px;">
+                  <ion-button color="primary" (click)="closeFechapagoModal()">Cerrar</ion-button>
+                </div>
+              </div>
+                
+            </ion-content>
+          </ng-template>
+        </ion-modal>
         <ion-modal [isOpen]="showDialog" (didDismiss)="closeDialog()">
           <ng-template>
             <ion-header>
@@ -130,6 +191,38 @@ interface Catastro {
     </ion-content>
   `,
   styles: [`
+
+.fechapago-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-top: 16px;
+                  margin-bottom: 8px;
+                }
+                .fechapago-table th, .fechapago-table td {
+                  border: 1px solid #ccc;
+                  padding: 8px 12px;
+                  text-align: center;
+                  font-size: 1rem;
+                }
+                .fechapago-table th {
+                  background: #f5f5f5;
+                  font-weight: bold;
+                }
+
+  .fechapago-label-centered {
+                        font-size: 1.0rem;
+                        color: navy;
+                        font-weight: bold;
+                        margin: 0 8px;
+                        text-align: center;
+                        letter-spacing: 1px;
+                        background: lightcoral;
+                        border-radius: 4px;
+                        padding: 2px 8px;
+                        box-shadow: none;
+                        display: inline-block;
+                      }
+
         ion-modal ion-content {
           padding: 40px 32px 32px 32px;
           border-radius: 18px;
@@ -183,6 +276,31 @@ interface Catastro {
       margin-bottom: 20px;
       padding: 8px 0;
     }
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .checks-row {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      margin-top: 0;
+      justify-content: flex-start;
+    }
+    .check-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .check-label {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+      text-align: center;
+    }
     .checks-row {
       display: flex;
       gap: 16px;
@@ -199,7 +317,7 @@ interface Catastro {
       padding-bottom: 40px;
     }
     ion-modal {
-      --width: 380px;
+      --width: 520px;
       --height: 560px;
       min-height: 320px;
       max-height: 700px;
@@ -318,12 +436,28 @@ interface Catastro {
   `]
 })
 export class GestionPropiedadesPage implements OnInit {
+  showPagado = false;
+  showFechapagoModal = false;
+    openFechapagoModal(catastro: Catastro) {
+      this.showFechapagoModal = true;
+      this.loadPagos(catastro?.id);
+
+    }
+
+    closeFechapagoModal() {
+      this.showFechapagoModal = false;
+      this.lstPagosCatastro = [];
+    }
+  ionViewWillEnter() {
+    this.loadCatastros();
+  }
       // ...existing code...
       // Método para refrescar arriendos (debe llamarse tras crear un arriendo)
       
   loading = false;
   error: string | null = null;
   catastros: Catastro[] = [];
+  lstPagosCatastro: PagoCatastro[] = [];
   showFelipe = true;
   showAgrario = true;
   showResidencial = false;
@@ -379,9 +513,11 @@ export class GestionPropiedadesPage implements OnInit {
   loadCatastros() {
     this.loading = true;
     this.error = null;
+    this.catastros = [];
     this.apiService.get<{success: boolean, data: Catastro[]}>('/app-alquiler/catastro')
       .subscribe({
         next: (response) => {
+          console.log('response',response);
           if (response.success && Array.isArray(response.data)) {
             this.catastros = [...response.data];
           } else {
@@ -399,6 +535,27 @@ export class GestionPropiedadesPage implements OnInit {
       });
   }
 
+
+    loadPagos(catastroid: number) {
+    this.lstPagosCatastro = [];
+    this.apiService.get<{success: boolean, data: any[]}>(`/app-alquiler/arriendos-pagos/${catastroid}`)
+      .subscribe({
+        next: (response) => {
+          if (response.success && Array.isArray(response.data)) {
+            this.lstPagosCatastro = [...response.data];
+          } else {
+            this.lstPagosCatastro = [];
+          }
+        },
+        error: (err) => {
+          
+          // this.error = err.message || 'Error al cargar los pagos del catastro';          
+        }
+      });
+  }
+
+
+
   onFelipeChange() {
     this.applyFilter();
   }
@@ -415,6 +572,10 @@ export class GestionPropiedadesPage implements OnInit {
     this.applyFilter();
   }
 
+    onPagadoChange() {
+    this.applyFilter();
+  }
+
   applyFilter() {
     let filtered = [...this.catastros];
     if (!this.showFelipe) {
@@ -423,12 +584,16 @@ export class GestionPropiedadesPage implements OnInit {
 
     if (!this.showAgrario) {
       filtered = filtered.filter(c => c.catastrotipoid !== 2);
-    } 
+    }
 
-    if (!this.showResidencial) {      
+    if (!this.showResidencial) {
       filtered = filtered.filter(c => c.catastrotipoid !== 1);
     }
-    
+
+    if (this.showPagado) {
+      filtered = filtered.filter(c => !!c.fechapago);
+    }
+
     if (this.searchText.trim()) {
       const text = this.searchText.trim().toLowerCase();
       filtered = filtered.filter(c =>
@@ -438,6 +603,8 @@ export class GestionPropiedadesPage implements OnInit {
     }
     this.filteredCatastros = filtered;
   }
+
+
 
   openDetalle(catastro: Catastro) {
     this.selectedCatastro = catastro;

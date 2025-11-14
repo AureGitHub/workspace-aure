@@ -36,12 +36,7 @@ export class AdminGuard implements CanActivate {
         const isAdmin = this.authService.isAdmin();
         const currentUser = this.authService.getCurrentUser();
         
-        console.log('🔍 AdminGuard: Usuario autenticado -', {
-          isLoggedIn,
-          isAdmin,
-          userType: currentUser?.user_type,
-          targetUrl: state.url
-        });
+   
 
         if (isAdmin) {
           console.log('✅ AdminGuard: Acceso permitido para admin');

@@ -7,7 +7,7 @@ import { Environment } from './environment.interface';
 export const environment: Environment = {
   production: false,
   backend: {
-    baseUrl: 'http://192.168.1.71:3001',
+    baseUrl: 'http://192.168.1.70:3001',
     apiPrefix: '/app-alquiler',
     timeout: 30000,
     retryAttempts: 2

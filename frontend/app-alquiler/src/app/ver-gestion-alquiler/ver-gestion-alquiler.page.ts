@@ -157,10 +157,22 @@ export class VerGestionAlquilerPage implements OnInit {
   alertButtons: any[] = [];
   tableColumns: TableColumn[] = [
     { field: 'direccion', header: 'direccion', sortable: true, filterable: true },
-    { field: 'fechapago', header: 'Fecha Pago', sortable: true, type: 'date', width: '150px' },
+    {
+      field: 'arriendotipoid',
+      header: 'Tipo',
+      sortable: true,
+      type: 'text',
+      width: '120px',
+      displayFn: (row: any) => {
+        if (row.arriendotipoid === 1) return 'Mensual';
+        if (row.arriendotipoid === 2) return 'Anual';
+        return '';
+      }
+    },
+    { field: 'fechapago', header: 'F.Pago', sortable: true, type: 'date', width: '150px' },
     { field: 'importe', header: 'Importe', sortable: true, type: 'number' },
     { field: 'quien', header: 'Inquilino', sortable: true, filterable: true },
-    { field: 'observaciones', header: 'Observaciones', filterable: true }
+    { field: 'observaciones', header: 'Obser.', filterable: true }
   ];
   tableConfig: TableConfig = {
     paginator: true,
@@ -226,7 +238,7 @@ export class VerGestionAlquilerPage implements OnInit {
     await modal.present();
     const { data, role } = await modal.onWillDismiss();
     if (role === 'confirm' && data) {
-      this.createArriendo(data);
+      this.loadArriendos();
     }
   }
 
@@ -264,7 +276,7 @@ export class VerGestionAlquilerPage implements OnInit {
     await modal.present();
     const { data, role } = await modal.onWillDismiss();
     if (role === 'confirm' && data) {
-      this.updateArriendo(arriendo.id, data);
+      this.loadArriendos();
     }
   }
 
@@ -311,7 +323,7 @@ export class VerGestionAlquilerPage implements OnInit {
   }
 
   deleteArriendo(id: number) {
-    this.apiService.delete<{success: boolean, data: Arriendo}>(`/app-alquiler/arriendo/${id}`)
+    this.apiService.delete<{success: boolean, data: Arriendo}>(`/app-alquiler/arriendos/${id}`)
       .subscribe({
         next: (response) => {
           if (response.success) {

@@ -9,6 +9,7 @@ export interface TableColumn {
   filterable?: boolean;
   type?: 'text' | 'number' | 'date' | 'boolean' | 'tag';
   width?: string;
+  displayFn?: (row: any) => string;
 }
 
 export interface TableConfig {
@@ -132,7 +133,7 @@ export interface TableConfig {
                     </span>
                   </span>
                   <span *ngSwitchDefault>
-                    {{ rowData[col.field] }}
+                    {{ col.displayFn ? col.displayFn(rowData) : rowData[col.field] }}
                   </span>
                 </ng-container>
               </td>

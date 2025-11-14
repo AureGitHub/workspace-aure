@@ -68,7 +68,7 @@ export interface User {
   first_name: string;
   last_name: string;
   phone?: string;
-  user_type: 'owner' | 'tenant' | 'admin';
+  profile_id: number;
   is_active: boolean;
   email_verified: boolean;
   created_at: string;

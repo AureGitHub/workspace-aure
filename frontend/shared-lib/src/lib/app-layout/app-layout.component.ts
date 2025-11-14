@@ -98,16 +98,12 @@ export interface AppLayoutConfig {
     <div class="custom-footer" *ngIf="config.showFooter">
       <div class="footer-content">
         <div class="footer-left">
-          <span class="footer-text">
-            {{ config.footerText || 'Workspace Aure © 2025' }}
-          </span>
+         
         </div>
         <div class="footer-center">
           <ng-content select="[slot=footer-center]"></ng-content>
         </div>
-        <div class="footer-right">
-          <ng-content select="[slot=footer-actions]"></ng-content>
-        </div>
+        
       </div>
     </div>
 

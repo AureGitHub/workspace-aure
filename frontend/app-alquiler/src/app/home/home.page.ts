@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
@@ -30,13 +31,13 @@ import { PageTitleService } from '../services/page-title.service';
   imports: [CommonModule, IonicModule],
   template: `
     <!-- Contenido principal -->
-    <ion-content class="app-alquiler-content">
+    <ion-content   class="app-alquiler-content ">
         <!-- Header Hero Section -->
         <div class="hero-section">
           <div class="hero-content">
             <ion-icon name="home-outline" class="hero-icon"></ion-icon>
-            <h1>Bienvenido a Alquiler ZarZa</h1>
-            <p>La plataforma más completa para gestionar los alquileres de Felipe</p>
+            <h1>Alquiler ZarZa</h1>
+            <p>Gestión arriendos de Felipe</p>
           </div>
         </div>
 
@@ -49,7 +50,6 @@ import { PageTitleService } from '../services/page-title.service';
                   <ion-card-content>
                     <ion-icon name="business-outline" color="primary" class="feature-icon"></ion-icon>
                     <h3>Gestión de Propiedades</h3>
-                    <p>Administra todas tus propiedades desde un solo lugar</p>
                   </ion-card-content>
                 </ion-card>
               </ion-col>
@@ -58,8 +58,7 @@ import { PageTitleService } from '../services/page-title.service';
                 <ion-card class="feature-card rental-card" (click)="onRentalManagementClick()">
                   <ion-card-content>
                     <ion-icon name="card-outline" color="tertiary" class="feature-icon"></ion-icon>
-                    <h3>Gestión de alquileres</h3>
-                    <p>Controla todos los contratos y pagos de alquiler</p>
+                    <h3>Gestión de arriendo</h3>
                   </ion-card-content>
                 </ion-card>
               </ion-col>
@@ -69,14 +68,14 @@ import { PageTitleService } from '../services/page-title.service';
                   <ion-card-content>
                     <ion-icon name="people-outline" color="secondary" class="feature-icon"></ion-icon>
                     <h3>Control de usuarios</h3>
-                    <p>Usuarios con acceso a la app</p>
                   </ion-card-content>
                 </ion-card>
               </ion-col>
             </ion-row>
           </ion-grid>
         </div>
-
+<div style="height: 100px;">
+</div>
  
         
         <!-- Toast para mensajes -->
@@ -91,9 +90,14 @@ import { PageTitleService } from '../services/page-title.service';
     </ion-content>
   `,
   styles: [`
-    .app-alquiler-content {
-      background: var(--ion-color-light);
+
+    :host ::ng-deep ion-content {
+      --overflow: auto !important;
+      overflow-y: auto !important;
+      touch-action: pan-y !important;
     }
+
+
 
     .hero-section {
       padding: 12px 8px;
@@ -128,19 +132,21 @@ import { PageTitleService } from '../services/page-title.service';
     .features-section {
       padding: 10px 20px 30px 20px; /* Reduce top and bottom padding for compactness */
       background: white;
+      overflow-y: auto;
+      max-height: 100vh;
     }
 
     .feature-card {
       text-align: center;
-      margin: 8px 0;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin: 6px 0;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       cursor: pointer;
       transition: all 0.3s ease;
-      min-height: 150px;
-      height: 150px; /* Force all cards to same height */
-      width: 100%; /* Ensure all cards take full column width */
-      max-width: 320px; /* Consistent max width for all cards */
+      min-height: 100px;
+      height: 100px; /* Smaller height for compact cards */
+      width: 100%;
+      max-width: 220px; /* Smaller max width for compact cards */
       margin-left: auto;
       margin-right: auto;
       display: flex;
@@ -165,8 +171,8 @@ import { PageTitleService } from '../services/page-title.service';
     }
 
     .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 8px;
+      font-size: 1.4rem;
+      margin-bottom: 6px;
       transition: all 0.3s ease;
     }
 

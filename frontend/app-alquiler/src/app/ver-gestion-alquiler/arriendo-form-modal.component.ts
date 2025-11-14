@@ -5,8 +5,10 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { ApiService } from 'shared-lib';
 
 export interface ArriendoFormData {
+  id: number;
   catastroid: number;
   fechapago: Date;
+  arriendotipoid: number;
   importe: number;
   quien: string;
   observaciones: string;
@@ -38,13 +40,30 @@ export interface ArriendoFormData {
           </ion-select>
         </ion-item>
         <ion-item>
-          <ion-label position="stacked">Fecha Pago *</ion-label>
-          <ion-input formControlName="fechapago" type="date" required></ion-input>
+          <ion-label position="stacked">Tipo Arriendo *</ion-label>
+          <div style="display: flex; gap: 24px; margin-top: 8px;">
+            <ion-checkbox
+              [checked]="arriendoForm.get('arriendotipoid')?.value === 2"
+              (ionChange)="toggleArriendoTipo(2, $event)"
+              color="primary"
+            >Anual</ion-checkbox>
+            <ion-checkbox
+              [checked]="arriendoForm.get('arriendotipoid')?.value === 1"
+              (ionChange)="toggleArriendoTipo(1, $event)"
+              color="primary"
+            >Mensual</ion-checkbox>
+          </div>
         </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Importe *</ion-label>
-          <ion-input formControlName="importe" type="number" required></ion-input>
-        </ion-item>
+          <div class="row-fields">
+            <ion-item class="inline-item">
+              <ion-label position="stacked">Fecha Pago *</ion-label>
+              <ion-input formControlName="fechapago" type="date" required></ion-input>
+            </ion-item>
+            <ion-item class="inline-item">
+              <ion-label position="stacked">Importe *</ion-label>
+              <ion-input formControlName="importe" type="number" required></ion-input>
+            </ion-item>
+          </div>
         <ion-item>
           <ion-label position="stacked">Inquilino *</ion-label>
           <ion-input formControlName="quien" required></ion-input>
@@ -64,9 +83,39 @@ export interface ArriendoFormData {
           </ion-button>
         </div>
       </form>
+            <!-- Toast para mensajes -->
+      <ion-toast 
+        [isOpen]="showToast"
+        [message]="toastMessage"
+        [duration]="3000"
+        [color]="toastColor"
+        position="bottom"
+        (didDismiss)="showToast = false">
+      </ion-toast>
     </ion-content>
   `,
   styles: [`
+            :host ::ng-deep ion-content {
+              overflow-y: auto !important;
+              max-height: 100% !important;
+            }
+        .row-fields {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 12px;
+        }
+        .inline-item {
+          flex: 1 1 0;
+          min-width: 0;
+          margin-bottom: 0 !important;
+        }
+    :host ::ng-deep .modal-wrapper {
+      width: 420px !important;
+      height: 800px !important;
+      min-height: 400px !important;
+      max-height: 900px !important;
+      margin-left: 80px !important;
+    }
     .button-container {
       margin-top: 24px;
       gap: 12px;
@@ -90,7 +139,12 @@ export class ArriendoFormModalComponent implements OnInit {
   @Input() arriendo?: Partial<ArriendoFormData>;
 
   arriendoForm!: FormGroup;
-  catastroOptions: Array<{id: number, descripcion: string}> = [];       
+  catastroOptions: Array<{id: number, descripcion: string}> = [];
+
+    // Toast para mensajes
+  showToast = false;
+  toastMessage = '';
+  toastColor = 'success';
 
   constructor(
     private modalController: ModalController,
@@ -119,49 +173,119 @@ export class ArriendoFormModalComponent implements OnInit {
 
   private createForm() {
     let fechapagoValue = '';
+    let arriendotipoidValue = 2; // Por defecto Anual
     if (this.isEdit && this.arriendo) {
-      // Si fechapago existe, convertir a YYYY-MM-DD
       if (this.arriendo.fechapago) {
         const d = new Date(this.arriendo.fechapago);
         if (!isNaN(d.getTime())) {
           fechapagoValue = d.toISOString().slice(0, 10);
         }
       }
+      arriendotipoidValue = this.arriendo.arriendotipoid ?? 2;
       this.arriendoForm = this.formBuilder.group({
         catastroid: [this.arriendo.catastroid ?? '', [Validators.required]],
+        arriendotipoid: [arriendotipoidValue, [Validators.required]],
         fechapago: [fechapagoValue, [Validators.required]],
         importe: [this.arriendo.importe ?? '', [Validators.required]],
         quien: [this.arriendo.quien ?? '', [Validators.required]],
         observaciones: [this.arriendo.observaciones ?? '']
       });
     } else if (this.arriendo && this.arriendo.catastroid) {
-      // Si se pasa catastroid desde el modal de alta, usarlo como valor inicial
+      arriendotipoidValue = this.arriendo.arriendotipoid ?? 2;
+      const today = new Date().toISOString().slice(0, 10);
       this.arriendoForm = this.formBuilder.group({
         catastroid: [this.arriendo.catastroid, [Validators.required]],
-        fechapago: ['', [Validators.required]],
+        arriendotipoid: [arriendotipoidValue, [Validators.required]],
+        fechapago: [today, [Validators.required]],
         importe: ['', [Validators.required]],
         quien: ['', [Validators.required]],
         observaciones: ['']
       });
     } else {
+      const today = new Date().toISOString().slice(0, 10);
       this.arriendoForm = this.formBuilder.group({
         catastroid: ['', [Validators.required]],
-        fechapago: ['', [Validators.required]],
+        arriendotipoid: [2, [Validators.required]],
+        fechapago: [today, [Validators.required]],
         importe: ['', [Validators.required]],
         quien: ['', [Validators.required]],
         observaciones: ['']
       });
     }
+   
   }
+
+   toggleArriendoTipo(tipo: number, event: any): void {
+      if (event.detail.checked) {
+        this.arriendoForm.patchValue({ arriendotipoid: tipo });
+      } else {
+        // If both are unchecked, set to null
+        const otherTipo = tipo === 2 ? 1 : 2;
+        const otherChecked = this.arriendoForm.get('arriendotipoid')?.value === otherTipo;
+        if (!otherChecked) {
+          this.arriendoForm.patchValue({ arriendotipoid: null });
+        }
+      }
+    }
 
   async onSubmit() {
     if (this.arriendoForm.valid) {
       const formData = this.arriendoForm.value;
-      await this.modalController.dismiss(formData, 'confirm');
+      const created = await this.managementArriendo();
+      if(created){
+          await this.modalController.dismiss(formData, 'confirm');
+      }
     }
   }
 
   async dismiss() {
     await this.modalController.dismiss(null, 'cancel');
   }
+
+
+    private showToastMessage(message: string, color: string = 'success') {
+    this.toastMessage = message;
+    this.toastColor = color;
+    this.showToast = true;
+  }
+
+     async managementArriendo() {
+
+      try{ 
+        const userData = this.arriendoForm.value;    
+        console.log('📡 Iniciando llamada POST...');
+
+        let response = null;
+
+        if(this.isEdit){
+          response= await this.apiService.put<{success: boolean, data: any}>(`/app-alquiler/arriendos/${this.arriendo?.id}`, userData).toPromise();
+        }
+        else{
+          response= await this.apiService.post<{success: boolean, data: any}>('/app-alquiler/arriendos', userData).toPromise();
+        }
+
+        
+         if (response && response.success && response.data) {
+            console.log('✅ Usuario gestionado exitosamente:', response.data);
+            this.showToastMessage('Usuario creado exitosamente', 'success');
+
+        return true;           
+          
+          }
+          else {
+            console.error('❌ Error en respuesta del servidor:', response);
+            this.showToastMessage('Error al crear usuario en el servidor', 'danger');
+            return false;
+          }
+      }
+      catch(error){  
+       
+        this.showToastMessage(`Error de conexión: ${error}`, 'danger');
+        return false;
+      }
+
+    }
+          
+  
+
 }

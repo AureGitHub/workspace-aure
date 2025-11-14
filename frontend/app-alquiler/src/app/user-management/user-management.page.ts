@@ -12,7 +12,8 @@ import {
   LoginData, 
   RegisterData,
   User,
-  BackendLoginRequest
+  BackendLoginRequest,
+  Rol
 } from 'shared-lib';
 
 @Component({
@@ -136,7 +137,7 @@ import {
                 <h2>{{ user.username }}</h2>
                 <h3>{{ user.email }}</h3>
                 <p>{{ user.first_name }} {{ user.last_name }}</p>
-                <p>Rol: <span class="user-role" [class]="'role-' + user.user_type">{{ user.user_type }}</span></p>
+                <p>Rol: <span class="user-role" [class]="'role-' + user.profile_id">{{ user.profile_id }}</span></p>
               </ion-label>
               
               <ion-chip 
@@ -292,9 +293,9 @@ import {
       text-transform: capitalize;
     }
 
-    .role-admin { color: var(--ion-color-danger); }
-    .role-owner { color: var(--ion-color-warning); }
-    .role-tenant { color: var(--ion-color-tertiary); }
+    .role-1 { color: var(--ion-color-danger); }
+    .role-2 { color: var(--ion-color-warning); }
+    .role-3 { color: var(--ion-color-tertiary); }
     .role-user { color: var(--ion-color-primary); }
 
     .status-chip {
@@ -435,44 +436,7 @@ export class UserManagementPage implements OnInit, OnDestroy {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       // Datos de usuarios desde el backend (estos son los que están en la base de datos)
-      this.users = [
-        {
-          id: 1,
-          username: 'admin',
-          email: 'admin@test.com',
-          first_name: 'Admin',
-          last_name: 'Sistema',
-          user_type: 'admin',
-          is_active: true
-        },
-        {
-          id: 2,
-          username: 'owner1',
-          email: 'owner@test.com',
-          first_name: 'Juan',
-          last_name: 'Propietario',
-          user_type: 'owner',
-          is_active: true
-        },
-        {
-          id: 3,
-          username: 'tenant1',
-          email: 'tenant@test.com',
-          first_name: 'María',
-          last_name: 'Inquilina',
-          user_type: 'tenant',
-          is_active: true
-        },
-        {
-          id: 4,
-          username: 'usuario_aure',
-          email: 'aure@workspace.com',
-          first_name: 'Aure',
-          last_name: 'Usuario',
-          user_type: 'admin',
-          is_active: true
-        }
-      ];
+      this.users = [];
 
       this.updateStats();
       this.showToastMessage('Usuarios cargados correctamente', 'success');
@@ -488,8 +452,8 @@ export class UserManagementPage implements OnInit, OnDestroy {
   private updateStats() {
     this.totalUsers = this.users.length;
     this.activeUsers = this.users.filter(u => u.is_active).length;
-    this.propertyOwners = this.users.filter(u => u.user_type === 'owner').length;
-    this.tenants = this.users.filter(u => u.user_type === 'tenant').length;
+    this.propertyOwners = this.users.filter(u => u.profile_id === Rol.owner).length;
+    this.tenants = this.users.filter(u => u.profile_id === Rol.tenant).length;
   }
 
   // Eventos de autenticación

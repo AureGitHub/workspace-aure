@@ -6,10 +6,10 @@
     (userProfileClick)="onUserProfileClick()"
     (authLogin)="onAuthLogin($event)"
     (authRegister)="onAuthRegister($event)">
-    
     <!-- El contenido de cada página se renderiza aquí -->
-    <ion-router-outlet></ion-router-outlet>
-    
+     <div  class="app-alquiler-content">
+      <ion-router-outlet></ion-router-outlet>
+    </div>
     <!-- Footer común -->
     <div slot="footer-center">
       <small>App Alquiler © 2025</small>

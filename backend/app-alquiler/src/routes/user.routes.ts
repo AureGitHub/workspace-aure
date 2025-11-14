@@ -134,11 +134,8 @@ export function createUserRoutes(userRepository: UserRepository): Router {
        // PUT /app-alquiler/users/:id - Actualizar usuario (NUEVO - SIMPLE)
       router.put("/app-alquiler/users/:id", async (ctx: any) => {
         try {
-          console.log(`🚀 PUT NUEVO - ALCANZADO`);
           
           const id = parseInt(ctx.params?.id);
-          console.log(`🚀 ID:`, id);
-          
           if (!id || isNaN(id)) {
             ctx.response.status = 400;
             ctx.response.body = {
