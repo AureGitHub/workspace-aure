@@ -21,8 +21,6 @@
     "@std/log": "jsr:@std/log@^0.224.9",
     "@std/crypto": "jsr:@std/crypto@^1.0.3",
     "@std/encoding": "jsr:@std/encoding@^1.0.5",
-    "postgres": "https://deno.land/x/postgres@v0.19.3/mod.ts",
-    "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts"
   },
   "compilerOptions": {
     "allowJs": true,

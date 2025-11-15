@@ -1,5 +1,5 @@
 // Database Module - PostgreSQL Connection and utilities
-import { Client, Pool } from "postgres";
+import { Client, Pool } from "./mod.ts";
 
 export interface DatabaseConfig {
   host?: string;
