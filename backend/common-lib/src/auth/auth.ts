@@ -1,6 +1,6 @@
 // Authentication Module - JWT Authentication
-import { create, verify, getNumericDate } from "djwt";
-import { crypto } from "@std/crypto";
+import { create, verify, getNumericDate,crypto } from "./mod.ts";
+
 
 export interface AuthConfig {
   jwtSecret?: string;

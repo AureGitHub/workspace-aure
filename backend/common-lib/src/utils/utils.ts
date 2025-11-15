@@ -1,5 +1,5 @@
 // Utils Module - Common utilities
-import { load } from "@std/dotenv";
+import { load } from "./mod.ts";
 
 // Environment configuration loader
 export async function loadConfig(): Promise<void> {
