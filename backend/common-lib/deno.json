@@ -17,10 +17,9 @@
     "lint": "deno lint"
   },
   "imports": {
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.0",
     "@std/log": "jsr:@std/log@^0.224.9",
     "@std/crypto": "jsr:@std/crypto@^1.0.3",
-    "@std/encoding": "jsr:@std/encoding@^1.0.5",
+    "@std/encoding": "jsr:@std/encoding@^1.0.5"
   },
   "compilerOptions": {
     "allowJs": true,
