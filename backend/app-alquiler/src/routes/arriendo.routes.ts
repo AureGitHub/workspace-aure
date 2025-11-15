@@ -1,5 +1,4 @@
-import { Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
-import { ArriendoRepository } from "../models/arriendo.repository.ts";
+import { Router, ArriendoRepository } from "../../mod.ts";
 
 export function createArriendoRoutes(arriendoRepository: ArriendoRepository): Router {
   const router = new Router();

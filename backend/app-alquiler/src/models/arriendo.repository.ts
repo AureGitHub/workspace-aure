@@ -1,5 +1,5 @@
 
-import { BaseRepository, DatabaseService } from "@common-lib/database/mod.ts";
+import { BaseRepository, DatabaseService } from "../../mod.ts";
 import { CreateArriendoInput } from "./types.ts";
 
 export interface Arriendo {

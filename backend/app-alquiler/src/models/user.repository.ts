@@ -1,5 +1,5 @@
 // User Repository - Database operations for users
-import { BaseRepository, DatabaseService } from "@common-lib/database/mod.ts";
+import { BaseRepository, DatabaseService } from "../../mod.ts";
 import { User, CreateUserInput, UpdateUserInput, Profile } from "./types.ts";
 
 export class UserRepository extends BaseRepository<User> {

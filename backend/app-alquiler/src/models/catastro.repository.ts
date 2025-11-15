@@ -1,5 +1,5 @@
 // Catastro Repository - Database operations for catastro
-import { BaseRepository, DatabaseService } from "@common-lib/database/mod.ts";
+import { BaseRepository, DatabaseService } from "../../mod.ts";;
 
 export interface Catastro {
   id: number;

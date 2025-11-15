@@ -1,6 +1,6 @@
 // CatastroTipo Repository - Database operations for catastro_tipo
 
-import { BaseRepository, DatabaseService } from "../../common-lib/src/database/mod.ts";
+import { BaseRepository, DatabaseService } from "../../mod.ts";;
 
 export interface CatastroTipo {
   id: number;

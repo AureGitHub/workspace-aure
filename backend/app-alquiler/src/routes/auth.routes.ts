@@ -1,7 +1,6 @@
 // Auth Routes - Authentication endpoints
-import { Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
+import { Router, AuthenticationService } from "../../mod.ts";
 import { AuthController } from "../controllers/auth.controller.ts";
-import { AuthenticationService } from "../services/auth.service.ts";
 
 export function createAuthRoutes(authService: AuthenticationService): Router {
   const router = new Router();

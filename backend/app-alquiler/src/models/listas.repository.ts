@@ -1,5 +1,5 @@
 // Profile Repository - Database operations for profiles
-import { BaseRepository, DatabaseService } from "@common-lib/database/mod.ts";
+import { BaseRepository, DatabaseService } from "../../mod.ts";;
 
 export class ListasRepository extends BaseRepository {
 

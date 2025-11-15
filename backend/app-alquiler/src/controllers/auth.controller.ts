@@ -1,5 +1,5 @@
 // Auth Controller - HTTP endpoints for authentication
-import { ResponseHelper, ValidationError, HTTP_STATUS } from "@common-lib/utils/mod.ts";
+import { ResponseHelper, ValidationError, HTTP_STATUS } from "../../mod.ts";
 import { AuthenticationService } from "../services/auth.service.ts";
 import { CreateUserInput, LoginInput } from "../models/types.ts";
 
@@ -52,6 +52,7 @@ export class AuthController {
   login = async (ctx: any) => {
     try {
           
+      console.log('llega aqui!!!')
       const body = await ctx.request.body.text();
       console.log("body:", body);
 

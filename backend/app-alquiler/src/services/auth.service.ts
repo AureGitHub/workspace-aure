@@ -1,7 +1,5 @@
 // Auth Service - Authentication and user management
-import { AuthService as CommonAuthService, createAuthService } from "@common-lib/auth/mod.ts";
-import { ValidationError, UnauthorizedError } from "@common-lib/utils/mod.ts";
-import { UserRepository } from "../models/user.repository.ts";
+import { UserRepository,ValidationError, UnauthorizedError,CommonAuthService, createAuthService } from "../../mod.ts";
 import { User, CreateUserInput, LoginInput } from "../models/types.ts";
 
 export class AuthenticationService {

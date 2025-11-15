@@ -1,6 +1,5 @@
 // User Management Routes - App Alquiler Backend
-import { Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
-import { UserRepository } from "../models/user.repository.ts";
+import { Router, UserRepository } from "../../mod.ts";
 
 export function createUserRoutes(userRepository: UserRepository): Router {
   

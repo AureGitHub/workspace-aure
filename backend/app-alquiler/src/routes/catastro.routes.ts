@@ -1,6 +1,5 @@
 // Catastro Routes - API endpoints for catastro
-import { Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
-import { CatastroRepository } from "../models/catastro.repository.ts";
+import { Router, CatastroRepository } from "../../mod.ts";
 
 export function createCatastroRoutes(catastroRepository: CatastroRepository) {
   const router = new Router();

@@ -26,7 +26,6 @@
     "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts"
   },
   "compilerOptions": {
-    "allowJs": true,
     "lib": ["deno.window"],
     "strict": true
   },

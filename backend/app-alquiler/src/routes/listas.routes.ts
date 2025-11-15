@@ -1,6 +1,4 @@
-import { Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
-import { ListasRepository } from "../models/listas.repository.ts";
-
+import { Router, ListasRepository } from "../../mod.ts";
 
 export function createListasRoutes(listasRepository: ListasRepository): Router {
   const router = new Router();

@@ -1,18 +1,21 @@
-// Main Application - App Alquiler Backend
-import { Application, Router } from "https://deno.land/x/oak@v17.1.0/mod.ts";
-import { createDatabaseService } from "@common-lib/database/mod.ts";
-import { loadConfig, Logger } from "@common-lib/utils/mod.ts";
-import { UserRepository } from "./models/user.repository.ts";
+import { 
+  Application, Router,
+  createDatabaseService,
 
-import { CatastroRepository } from "./models/catastro.repository.ts";
-import { createUserRoutes } from "./routes/user.routes.ts";
-import { ArriendoRepository } from "./models/arriendo.repository.ts";
-import { createArriendoRoutes } from "./routes/arriendo.routes.ts";
-import { AuthenticationService } from "./services/auth.service.ts";
-import { createAuthRoutes } from "./routes/auth.routes.ts";
-import { createCatastroRoutes } from "./routes/catastro.routes.ts";
-import { createListasRoutes } from "./routes/listas.routes.ts";
-import { ListasRepository } from "./models/listas.repository.ts";
+  loadConfig, Logger,
+
+  UserRepository,
+  CatastroRepository,
+  createUserRoutes,
+  ArriendoRepository,
+  createArriendoRoutes,
+  AuthenticationService,
+  createAuthRoutes,
+  createCatastroRoutes,
+  createListasRoutes,
+  ListasRepository
+} from "../mod.ts";
+
 
 async function main() {
   try {
@@ -43,10 +46,11 @@ async function main() {
       await db.connect();
       Logger.info("Database connected successfully");
       
-      userRepository = new UserRepository(db);
-      listasRepository = new ListasRepository(db);
+      
+       listasRepository = new ListasRepository(db);
       catastroRepository = new CatastroRepository(db);
       arriendoRepository = new ArriendoRepository(db);
+       userRepository = new UserRepository(db);
       authService = new AuthenticationService(userRepository);
       
 
