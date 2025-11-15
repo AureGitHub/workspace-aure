@@ -1,5 +1,5 @@
 // Server Module - Oak Server Configuration
-import { Application, Router } from "@oak/oak";
+import { Application, Router } from "./mod.ts";
 
 export interface ServerConfig {
   port?: number;

@@ -30,5 +30,8 @@
   "files.autoSave": "afterDelay",
   "workbench.editor.restoreViewState": false,
   "copilot.inlineChat.diff": "none",
-  "editor.inlineSuggest.enabled": false
+  "editor.inlineSuggest.enabled": false,
+  "deno.enable": true,
+  "deno.importMap": "./deno.json"
+   
 }
