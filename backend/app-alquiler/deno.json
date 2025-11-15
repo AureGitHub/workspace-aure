@@ -16,7 +16,7 @@
     "lint": "deno lint"
   },
   "imports": {
-    "common-lib/" : "../common-lib/",
+    "common-lib/": "../common-lib/",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.0",
     "@std/log": "jsr:@std/log@^0.224.9",
     "@std/crypto": "jsr:@std/crypto@^1.0.3",
@@ -25,7 +25,9 @@
     "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts"
   },
   "compilerOptions": {
-    "lib": ["deno.window"],
+    "lib": [
+      "deno.window"
+    ],
     "strict": true
   },
   "fmt": {
@@ -35,15 +37,32 @@
     "semiColons": true,
     "singleQuote": false,
     "proseWrap": "preserve",
-    "include": ["src/"]
+    "include": [
+      "src/"
+    ]
   },
   "lint": {
-    "include": ["src/"],
+    "include": [
+      "src/"
+    ],
     "rules": {
-      "tags": ["recommended"]
+      "tags": [
+        "recommended"
+      ]
     }
   },
   "test": {
-    "include": ["src/", "tests/"]
+    "include": [
+      "src/",
+      "tests/"
+    ]
+  },
+  "deploy": {
+    "project": "4c6784ce-5c3c-433d-be33-21e811cf2d53",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "src\\main.ts"
   }
 }
