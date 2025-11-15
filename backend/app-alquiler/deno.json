@@ -16,8 +16,7 @@
     "lint": "deno lint"
   },
   "imports": {
-    "@common-lib/": "../common-lib/src/",
-    "@oak/oak": "jsr:@oak/oak@^17.1.0",
+    "common-lib/" : "../common-lib/",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.0",
     "@std/log": "jsr:@std/log@^0.224.9",
     "@std/crypto": "jsr:@std/crypto@^1.0.3",

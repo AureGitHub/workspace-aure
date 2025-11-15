@@ -1,0 +1,6 @@
+{
+  "extends": "./deno.json",
+  "imports": {
+     "common-lib/" : "https://raw.githubusercontent.com/AureGitHub/workspace-aure/refs/heads/main/backend/common-lib/"
+  }
+}

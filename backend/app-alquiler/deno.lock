@@ -2,7 +2,6 @@
   "version": "5",
   "specifiers": {
     "jsr:@oak/commons@1": "1.0.1",
-    "jsr:@oak/oak@^17.1.0": "17.1.6",
     "jsr:@std/assert@1": "1.0.15",
     "jsr:@std/bytes@1": "1.0.6",
     "jsr:@std/bytes@^1.0.2": "1.0.6",
@@ -20,8 +19,7 @@
     "jsr:@std/log@~0.224.9": "0.224.14",
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@1": "1.1.2",
-    "npm:path-to-regexp@6.2.1": "6.2.1",
-    "npm:path-to-regexp@^6.3.0": "6.3.0"
+    "npm:path-to-regexp@6.2.1": "6.2.1"
   },
   "jsr": {
     "@oak/commons@1.0.1": {
@@ -33,18 +31,6 @@
         "jsr:@std/encoding@1",
         "jsr:@std/http",
         "jsr:@std/media-types"
-      ]
-    },
-    "@oak/oak@17.1.6": {
-      "integrity": "c7eef2eec733fba8e72b679bba3b8cf2fceccf5ef489a8b8fb43571908c0335d",
-      "dependencies": [
-        "jsr:@oak/commons",
-        "jsr:@std/assert",
-        "jsr:@std/bytes@1",
-        "jsr:@std/http",
-        "jsr:@std/media-types",
-        "jsr:@std/path",
-        "npm:path-to-regexp@^6.3.0"
       ]
     },
     "@std/assert@1.0.15": {
@@ -107,9 +93,6 @@
   "npm": {
     "path-to-regexp@6.2.1": {
       "integrity": "sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw=="
-    },
-    "path-to-regexp@6.3.0": {
-      "integrity": "sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ=="
     }
   },
   "remote": {
@@ -417,7 +400,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@oak/oak@^17.1.0",
       "jsr:@std/crypto@^1.0.3",
       "jsr:@std/dotenv@0.225",
       "jsr:@std/encoding@^1.0.5",
