@@ -1,0 +1,137 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "shared-lib": {
+      "projectType": "library",
+      "root": "projects/shared-lib",
+      "sourceRoot": "projects/shared-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/shared-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/shared-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/shared-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/shared-lib/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "app-arriendo": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/app-arriendo",
+      "sourceRoot": "projects/app-arriendo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/app-arriendo/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/app-arriendo/tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/app-arriendo/public"
+              }
+            ],
+            "styles": [
+              "projects/app-arriendo/src/styles.css",               
+               "node_modules/@ionic/angular/css/core.css",
+              "node_modules/@ionic/angular/css/structure.css",
+              "node_modules/@ionic/angular/css/typography.css",
+              "projects/app-arriendo/src/global.scss",
+              "projects/app-arriendo/src/theme/variables.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+               "budgets": [
+                        {
+                          "type": "initial",
+                          "maximumWarning": "1.5mb",
+                          "maximumError": "2mb"
+                        },
+                        {
+                          "type": "anyComponentStyle",
+                          "maximumWarning": "1.5mb",
+                          "maximumError": "2mb"
+                        }
+                      ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "app-arriendo:build:production"
+            },
+            "development": {
+              "buildTarget": "app-arriendo:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/app-arriendo/tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/app-arriendo/public"
+              }
+            ],
+            "styles": [
+              "projects/app-arriendo/src/styles.css",
+              "projects/app-arriendo/src/theme/variables.scss",
+               
+               "node_modules/@ionic/angular/css/core.css",
+              "node_modules/@ionic/angular/css/structure.css",
+              "node_modules/@ionic/angular/css/typography.css",
+              "projects/app-arriendo/src/global.scss",
+              "projects/app-arriendo/src/theme/variables.scss"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

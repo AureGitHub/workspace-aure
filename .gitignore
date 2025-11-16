@@ -1,3 +1,5 @@
+# Angular build cache
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -99,6 +101,7 @@ bazel-out
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.angular/*
 
 # System Files
 .DS_Store
@@ -120,3 +123,6 @@ ios/
 
 # Log files
 *.log
+# Local Netlify folder
+.netlify
+frontend/projects/app-arriendo/.angular/cache/20.3.10/app/vite/deps/chunk-DEEIKP5K.js

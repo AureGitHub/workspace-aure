@@ -1,7 +1,0 @@
-{
-  "name": "app-alquiler",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular-standalone"
-}
