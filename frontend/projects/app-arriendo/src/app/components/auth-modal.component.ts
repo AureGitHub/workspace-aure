@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import {  ModalController } from '@ionic/angular';
 
 // Imports de la librería compartida
 import { 
@@ -12,11 +12,13 @@ import {
   BackendLoginRequest,
   BackendRegisterRequest
 } from 'shared-lib';
+import { IonToast } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [CommonModule, IonicModule, AuthComponent],
+  imports: [CommonModule, IonToast, AuthComponent],
+    providers: [ModalController],
   template: `
     <lib-auth
       #authComponent

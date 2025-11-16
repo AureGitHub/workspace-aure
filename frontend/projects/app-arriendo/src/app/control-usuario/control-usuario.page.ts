@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { 
@@ -30,6 +30,7 @@ import { PageTitleService } from '../services/page-title.service';
 
 // Import del modal de formulario
 import { UserFormModalComponent } from './user-form-modal.component';
+import { IonContent, IonSpinner, IonCard, IonCardContent, IonIcon, IonButton, IonToast, IonAlert } from '@ionic/angular/standalone';
 
 interface User {
   id: number;
@@ -46,7 +47,8 @@ interface User {
 @Component({
   selector: 'app-control-usuario',
   standalone: true,
-  imports: [CommonModule, IonicModule, SharedTableComponent],
+  imports: [CommonModule, IonContent, SharedTableComponent, IonSpinner, IonCard, IonCardContent, IonIcon, IonButton, IonToast, IonAlert],
+  providers: [ModalController, AlertController],
   template: `
     <ion-content [fullscreen]="true" class="control-usuario-content">
       <!-- Table Section -->

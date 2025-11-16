@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonicModule, ModalController } from '@ionic/angular';
 import { ApiService } from 'shared-lib';
 
 export interface ArriendoFormData {
@@ -14,10 +13,32 @@ export interface ArriendoFormData {
   observaciones: string;
 }
 
+import { ModalController } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonIcon, IonItem, IonLabel, IonSelectOption, IonSelect, IonCheckbox, IonToast, IonInput } from '@ionic/angular/standalone';
+
 @Component({
   selector: 'app-arriendo-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonicModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonButton,
+    IonButtons,
+    IonIcon,
+    IonContent,
+    IonItem,
+    IonLabel,
+    IonSelectOption,
+    IonSelect,
+    IonCheckbox,
+    IonToast,
+    IonInput
+  ],
+    providers: [ModalController],
+  
   template: `
     <ion-header>
       <ion-toolbar>
@@ -31,9 +52,9 @@ export interface ArriendoFormData {
     </ion-header>
     <ion-content class="ion-padding">
       <form [formGroup]="arriendoForm" (ngSubmit)="onSubmit()">
-        <ion-item>
+        <ion-item class="inline-item">
           <ion-label position="stacked">Propiedad *</ion-label>
-          <ion-select formControlName="catastroid" required interface="popover" placeholder="Selecciona un catastro">
+          <ion-select formControlName="catastroid" required interface="popover" placeholder="Selecciona un catastro" style="width:100%">
             <ion-select-option *ngFor="let c of catastroOptions" [value]="c.id">
               {{c.id}} - {{c.descripcion}}
             </ion-select-option>
@@ -105,9 +126,20 @@ export interface ArriendoFormData {
           margin-bottom: 12px;
         }
         .inline-item {
+          display: flex;
           flex: 1 1 0;
           min-width: 0;
           margin-bottom: 0 !important;
+        }
+        .inline-item ion-select {
+          flex: 1 1 0;
+          min-width: 0;
+        }
+        .inline-item ion-select::part(interface-popover),
+        .inline-item ion-select::part(list) {
+          width: 100% !important;
+          min-width: 400px !important;
+          max-width: 600px !important;
         }
     :host ::ng-deep .modal-wrapper {
       width: 420px !important;

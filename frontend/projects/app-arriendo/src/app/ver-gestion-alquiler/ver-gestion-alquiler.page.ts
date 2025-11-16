@@ -1,11 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { PageTitleService } from '../services';
 import { ApiService, SharedTableComponent, TableColumn, TableConfig } from 'shared-lib';
 import { addIcons } from 'ionicons';
 import { saveOutline } from 'ionicons/icons';
 import { ArriendoFormModalComponent } from './arriendo-form-modal.component';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonSpinner, IonCard, IonCardContent, IonIcon, IonButton, IonToast, IonAlert } from '@ionic/angular/standalone';
 
 export interface Arriendo {
   id: number;
@@ -19,7 +20,9 @@ export interface Arriendo {
 @Component({
   selector: 'app-ver-gestion-alquiler',
   standalone: true,
-  imports: [CommonModule, IonicModule, SharedTableComponent],
+  imports: [CommonModule,  SharedTableComponent, IonContent, IonSpinner, IonCard, IonCardContent, IonIcon, IonButton, IonToast, IonAlert],
+    providers: [ModalController,AlertController],
+
   template: `
     <ion-content [fullscreen]="true" class="ver-gestion-alquiler-content">
       <div class="table-section">

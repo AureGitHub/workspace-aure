@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { 
@@ -12,13 +11,16 @@ import {
   personOutline
 } from 'ionicons/icons';
 
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon, IonCard, IonCardContent, IonList, IonItem, IonLabel, IonChip, IonToast } from '@ionic/angular/standalone';
+
+
 // Imports de la librería compartida
 import { AuthService } from 'shared-lib';
 
 @Component({
   selector: 'app-no-permitido',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonContent, IonCard, IonCardContent, IonList, IonItem, IonLabel, IonChip, IonToast],
   template: `
     <ion-header [translucent]="true">
       <ion-toolbar color="danger">

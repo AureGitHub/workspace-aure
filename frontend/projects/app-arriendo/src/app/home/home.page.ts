@@ -1,7 +1,6 @@
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
@@ -19,6 +18,9 @@ import {
   cardOutline
 } from 'ionicons/icons';
 
+import { IonContent, IonIcon, IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonToast } from '@ionic/angular/standalone';
+
+
 // Imports de la librería compartida
 import { AuthService, AppLayoutComponent, AppLayoutConfig } from 'shared-lib';
 
@@ -28,7 +30,7 @@ import { PageTitleService } from '../services/page-title.service';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonContent, IonIcon, IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonToast],
   template: `
     <!-- Contenido principal -->
     <ion-content   class="app-alquiler-content ">

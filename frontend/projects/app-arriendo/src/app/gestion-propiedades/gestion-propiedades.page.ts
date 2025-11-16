@@ -1,7 +1,7 @@
 // ...existing code...
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -17,6 +17,10 @@ import { ApiService } from 'shared-lib';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTree, faBuilding, faInfoCircle, faEuroSign } from '@fortawesome/free-solid-svg-icons';
 import { ModalController } from '@ionic/angular';
+
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonSpinner, IonCard, IonCardContent, IonIcon, IonCardHeader, IonCardTitle, IonCardSubtitle, IonModal, IonButtons, IonButton } from '@ionic/angular/standalone';
+import { IonCheckbox } from '@ionic/angular/standalone';
+import { IonInput } from '@ionic/angular/standalone';
 
 interface Catastro {
   id: number;
@@ -46,7 +50,11 @@ interface PagoCatastro{
 @Component({
   selector: 'app-gestion-propiedades',
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule, FontAwesomeModule],
+  imports: [
+    CommonModule,  FormsModule,
+    IonContent, FontAwesomeModule, IonItem, IonLabel, IonSpinner, IonCard, IonCardContent, IonIcon, IonCardHeader, IonCardTitle, IonCardSubtitle, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonCheckbox, IonInput],
+    providers: [ModalController],
+  
   template: `
     <ion-content [fullscreen]="true" class="gestion-propiedades-content">
       <div class="table-section">
@@ -55,25 +63,25 @@ interface PagoCatastro{
           <div class="search-row">
             <ion-item style="flex: 1;">
               <ion-label class="buscador-label">Buscar</ion-label>
-              <ion-input [(ngModel)]="searchText" (ionInput)="onSearchChange()" placeholder="Dirección o referencia..." class="buscador-input"></ion-input>
+              <ion-input [value]="searchText" (ionInput)="searchText = ($event.target && $event.target.value) ? ('' + $event.target.value) : ''; onSearchChange()" placeholder="Dirección o referencia..." class="buscador-input"></ion-input>
             </ion-item>
           </div>
           <div class="checks-row">
             <div class="check-col">
               <div class="check-label">Felipe</div>
-              <ion-checkbox [(ngModel)]="showFelipe" (ionChange)="onFelipeChange()"></ion-checkbox>
+                <ion-checkbox [checked]="showFelipe" (ionChange)="showFelipe = $event.detail.checked; onFelipeChange()"></ion-checkbox>
             </div>
             <div class="check-col">
               <div class="check-label">Agrario</div>
-              <ion-checkbox [(ngModel)]="showAgrario" (ionChange)="onAgrarioChange()"></ion-checkbox>
+                <ion-checkbox [checked]="showAgrario" (ionChange)="showAgrario = $event.detail.checked; onAgrarioChange()"></ion-checkbox>
             </div>
             <div class="check-col">
               <div class="check-label">Residencial</div>
-              <ion-checkbox [(ngModel)]="showResidencial" (ionChange)="onResidencialChange()"></ion-checkbox>
+                <ion-checkbox [checked]="showResidencial" (ionChange)="showResidencial = $event.detail.checked; onResidencialChange()"></ion-checkbox>
             </div>
             <div class="check-col">
               <div class="check-label">Pagado</div>
-              <ion-checkbox [(ngModel)]="showPagado" (ionChange)="onPagadoChange()"></ion-checkbox>
+                <ion-checkbox [checked]="showPagado" (ionChange)="showPagado = $event.detail.checked; onPagadoChange()"></ion-checkbox>
             </div>
           </div>
         </div>
@@ -461,7 +469,7 @@ export class GestionPropiedadesPage implements OnInit {
   showFelipe = true;
   showAgrario = true;
   showResidencial = false;
-  searchText = '';
+  searchText: string = '';
   filteredCatastros: Catastro[] = [];
   showDialog = false;
   selectedCatastro: Catastro | null = null;

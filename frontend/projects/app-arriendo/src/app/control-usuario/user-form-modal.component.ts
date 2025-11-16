@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent, IonItem, IonLabel, IonText, IonCard, IonSelectOption, IonCardContent } from '@ionic/angular/standalone';
+import { IonInput, IonSelect } from '@ionic/angular/standalone';
 
 interface Profile {
   id: number;
@@ -29,7 +31,8 @@ interface UserFormData {
 @Component({
   selector: 'app-user-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonicModule],
+  imports: [CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent, IonItem, IonLabel, IonText, IonCard, IonSelectOption, IonCardContent, IonInput, IonSelect],
+    providers: [ModalController],  
   template: `
     <ion-header>
       <ion-toolbar>
