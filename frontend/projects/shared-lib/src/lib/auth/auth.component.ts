@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { 
   eye, 
@@ -18,6 +17,8 @@ import {
 } from 'ionicons/icons';
 
 import type {AuthConfig} from './auth.interfaces';
+
+
 
 import { 
   LoginData, 
